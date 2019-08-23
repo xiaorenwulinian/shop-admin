@@ -39,7 +39,10 @@ class RouteServiceProvider extends ServiceProvider
 
         $this->mapWebRoutes();
 
-        //
+        $this->mapBackendRoutes();
+
+        $this->mapMiniProgramRoutes();
+
     }
 
     /**
@@ -69,5 +72,26 @@ class RouteServiceProvider extends ServiceProvider
              ->middleware('api')
              ->namespace($this->namespace)
              ->group(base_path('routes/api.php'));
+    }
+
+    /**
+     * 后台管理入口
+     */
+    protected function mapBackendRoutes()
+    {
+        Route::middleware('backend')
+            ->namespace($this->namespace)
+            ->group(base_path('routes/backend.php'));
+    }
+
+    /**
+     * 小程序路由入口
+     */
+    protected function mapMiniProgramRoutes()
+    {
+        Route::prefix('miniProgram')
+            ->middleware('miniProgram')
+            ->namespace($this->namespace)
+            ->group(base_path('routes/miniProgram.php'));
     }
 }
