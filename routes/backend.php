@@ -20,9 +20,8 @@ Route::get('/', function () {
 
 Route::group(['prefix'=>'backend'],function ($route) {
     // 127.0.0.1:80/backend/test
-    $route->get('test',function () {
-        return 'backend test';
-    });
+    $route->get('test','Backend\TestController@test');
+
     $route->get('login','Backend\LoginController@login');
     $route->group(['prefix'=>'user'],function ($route) {
         $route->get('index',function () {
