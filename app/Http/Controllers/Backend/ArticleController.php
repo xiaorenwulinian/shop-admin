@@ -4,15 +4,15 @@ namespace App\Http\Controllers\backend;
 
 use App\Model\Article;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Backend\BackendBaseController;
 use Illuminate\Support\Facades\DB;
 
 class ArticleController extends BackendBaseController
 {
-    public function __construct()
-    {
-        parent::__construct();
-    }
+//    public function __construct()
+//    {
+//        parent::__construct();
+//    }
 
     public function lst(Request $request)
     {

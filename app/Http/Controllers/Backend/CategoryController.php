@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\backend;
 
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Backend\BackendBaseController;
 use Illuminate\Support\Facades\DB;
 
 class CategoryController extends BackendBaseController
