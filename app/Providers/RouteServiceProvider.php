@@ -45,6 +45,8 @@ class RouteServiceProvider extends ServiceProvider
 
         $this->mapLclapiRoutes();
 
+        $this->mapKathyRoutes();
+
     }
 
     /**
@@ -106,5 +108,12 @@ class RouteServiceProvider extends ServiceProvider
         Route::middleware('lclapi')
             ->namespace($this->namespace)
             ->group(base_path('routes/lclapi.php'));
+    }
+
+    protected function mapKathyRoutes()
+    {
+        Route::middleware('kathy')
+            ->namespace($this->namespace)
+            ->group(base_path('routes/kathy.php'));
     }
 }

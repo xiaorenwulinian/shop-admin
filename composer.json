@@ -10,8 +10,12 @@
     "require": {
         "php": "^7.1.3",
         "fideloper/proxy": "^4.0",
+        "firebase/php-jwt": "^5.0",
+        "guzzlehttp/guzzle": "^6.3",
+        "hashids/hashids": "^4.0",
         "laravel/framework": "5.8.*",
         "laravel/tinker": "^1.0",
+        "silber/bouncer": "v1.0.0-rc.5",
         "lcobucci/jwt": "^3.3",
         "phpoffice/phpspreadsheet": "^1.9"
     },
