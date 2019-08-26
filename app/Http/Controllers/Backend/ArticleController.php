@@ -16,6 +16,7 @@ class ArticleController extends BackendBaseController
 
     public function lst(Request $request)
     {
+        $all_param = $request->all();
         $default_page_size = 10; // 每一页默认显示的条数
         $page_size = $request->input('page_size',$default_page_size);
         $page_size_select = page_size_select($page_size); //生成下拉选择页数框
@@ -59,7 +60,8 @@ class ArticleController extends BackendBaseController
             ->select($select_filed)
             ->orderBy('a.id','desc')
             ->paginate($page_size);
-//            ->paginate($page_size,false,['query' => request()->all()]);
+//            ->paginate($page_size,false,['query' => request()-
+        $list->appends($request->input());
         $page = $list->render();
         $cur_page = $request->input('page',1);
 //        $url = url('add',['page'=>$cur_page]);

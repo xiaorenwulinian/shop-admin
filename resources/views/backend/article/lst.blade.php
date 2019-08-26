@@ -50,7 +50,7 @@
                 <option value="{{$v->id}}" {{$selected}}>{{$v->title}}</option>
                 <?php endforeach;?>
             </select>
-            <input  type="hidden" name="page_size" id="cur_show_page" value="{$page_size}"/>
+            <input  type="hidden" name="page_size" id="cur_show_page" value="{{$page_size}}"/>
             <input class="btn btn-flat btn-primary" type="submit" value="搜索">
             <!--<input class="btn btn-flat btn-primary m_10" onclick="location.href='{:url(\'lst\')}'" type="button" value="显示全部">-->
             <input class="btn btn-flat btn-warning multi_del" type="button" value="批量删除">
