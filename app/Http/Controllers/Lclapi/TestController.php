@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Lclapi;
 
-use App\Common\Library\Tools\ExcelTool;
+use App\Common\Library\Tools\FirebaseJwtToken;
 use App\Common\Library\Tools\StingTool;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -41,6 +41,6 @@ class TestController extends Controller
         ];
         //导出的文件名称
         $file_name = '文章列表'.date('Y-m-d-H-i-s');
-        ExcelTool::excelExport($data,$header,$field,$file_name);
+        FirebaseJwtToken::excelExport($data,$header,$field,$file_name);
     }
 }

@@ -10,12 +10,18 @@ if (!function_exists('res_success')) {
      * @return false|string
      */
     function res_success ($data = [], $message = '',$code = 200) {
-        $ret = [
-            'code' => $code,
+//        $ret = [
+//            'code' => $code,
+//            'msg'  => $message,
+//            'data' => $data,
+//        ];
+//        return json_encode($ret,JSON_UNESCAPED_UNICODE);
+        return response()->json([
+            'code' => '200',
             'msg'  => $message,
-            'data' => $data,
-        ];
-        return json_encode($ret,JSON_UNESCAPED_UNICODE);
+            'time' => time(),
+            'data' => $data
+        ], $code, [])->setEncodingOptions(JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
     }
 }
 
