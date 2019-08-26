@@ -43,6 +43,8 @@ class RouteServiceProvider extends ServiceProvider
 
         $this->mapMiniProgramRoutes();
 
+        $this->mapLclapiRoutes();
+
     }
 
     /**
@@ -93,5 +95,16 @@ class RouteServiceProvider extends ServiceProvider
             ->middleware('miniProgram')
             ->namespace($this->namespace)
             ->group(base_path('routes/miniProgram.php'));
+    }
+
+
+    /**
+     * lclapi 测试API
+     */
+    protected function mapLclapiRoutes()
+    {
+        Route::middleware('lclapi')
+            ->namespace($this->namespace)
+            ->group(base_path('routes/lclapi.php'));
     }
 }

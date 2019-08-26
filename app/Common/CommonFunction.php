@@ -15,7 +15,7 @@ if (!function_exists('res_success')) {
             'msg'  => $message,
             'data' => $data,
         ];
-        return json_encode($ret);
+        return json_encode($ret,JSON_UNESCAPED_UNICODE);
     }
 }
 
@@ -34,7 +34,7 @@ if (!function_exists('res_fail')) {
             'msg'  => $message,
             'data' => $data,
         ];
-        return json_encode($ret);
+        return json_encode($ret,JSON_UNESCAPED_UNICODE);
     }
 }
 
