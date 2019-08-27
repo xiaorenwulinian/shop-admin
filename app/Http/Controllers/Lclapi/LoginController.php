@@ -24,7 +24,7 @@ class LoginController extends Controller
        $phone = $request->input('phone');
        $pwd   = $request->input('pwd');
        if (!preg_match('/^1[3-9]\d{9}$/',$phone)) {
-            return res_fail([],'请输入正确的手机号码');
+            return res_fail('请输入正确的手机号码');
        }
        if (empty($pwd)) {
            return res_fail('请输入密码');
