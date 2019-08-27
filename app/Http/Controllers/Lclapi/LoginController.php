@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-
+use Illuminate\Support\Facades\Redis;
 
 
 class LoginController extends Controller
@@ -21,29 +21,47 @@ class LoginController extends Controller
     public function login(Request $request)
     {
 
-       $phone = $request->input('phone');
-       $pwd   = $request->input('pwd');
-       if (!preg_match('/^1[3-9]\d{9}$/',$phone)) {
-            return res_fail([],'请输入正确的手机号码');
-       }
-       if (empty($pwd)) {
-           return res_fail('请输入密码');
-       }
-        $appUser = DB::table('app_user')->where('phone','=',$phone)->first();
+        $phone = $request->input('phone');
+        $pwd = $request->input('pwd');
+        if (!preg_match('/^1[3-9]\d{9}$/', $phone)) {
+            return res_fail([], '请输入正确的手机号码');
+        }
+        if (empty($pwd)) {
+            return res_fail('请输入密码');
+        }
+        $appUser = DB::table('app_user')->where('phone', '=', $phone)->first();
         if (empty($appUser)) {
             return res_fail('手机号码不存在！');
         }
         $appUser = (array)$appUser;
-        $isValidate = Hash::check($pwd,$appUser['password']);
+        $isValidate = Hash::check($pwd, $appUser['password']);
         if (!$isValidate) {
             return res_fail('密码错误');
         }
         $jwtToken = FirebaseJwtToken::getInstance()->generateTokenLclapi($appUser);
+
+        $this->updateToken($appUser, $jwtToken);
         $ret = [
             'token' => $jwtToken,
-            'user'  => $appUser,
+            'user' => $appUser,
         ];
-       return res_success($ret,'login ok');
+        return res_success($ret, 'login ok');
+    }
+
+    /**
+     * 更新 redis 用户的 token ，实现单点登陆
+     * @param $user
+     * @param $token
+     */
+    private function updateToken($user, $token)
+    {
+        $hashKey = "users:token";
+        $key = 'lcl_api_token:' . $user['phone'];
+//        $oldToken = Redis::hGet($hashKey,$key);
+//        if ($oldToken && $oldToken != $token) {
+//
+//        }
+        Redis::hSet($hashKey, $key, $token);
     }
 
     public function userInfo(Request $request)

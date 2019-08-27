@@ -15,9 +15,10 @@
         "hashids/hashids": "^4.0",
         "laravel/framework": "5.8.*",
         "laravel/tinker": "^1.0",
-        "silber/bouncer": "v1.0.0-rc.5",
         "lcobucci/jwt": "^3.3",
-        "phpoffice/phpspreadsheet": "^1.9"
+        "phpoffice/phpspreadsheet": "^1.9",
+        "predis/predis": "^1.1",
+        "silber/bouncer": "v1.0.0-rc.5"
     },
     "require-dev": {
         "beyondcode/laravel-dump-server": "^1.0",
