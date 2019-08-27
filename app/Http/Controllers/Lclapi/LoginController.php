@@ -38,19 +38,7 @@ class LoginController extends Controller
         if (!$isValidate) {
             return res_fail('密码错误');
         }
-        $secretKey = 'app_user_token';
-        $time = time();
-        $host = $request->getHost(); // 网站的域名
-
-        $secretToken = array(
-            "iss" => $host,
-            "aud" => $host,
-            "iat" => $time,
-            "nbf" => $time,
-            "exp" => $time + 3600,
-            "uid" => $appUser['id'], // 不建议存太多信息，用户ID和姓名即可，敏感信息会被窃取
-        );
-        $jwtToken = JWT::encode($secretToken, $secretKey);
+        $jwtToken = FirebaseJwtToken::getInstance()->generateTokenLclapi($appUser);
         $ret = [
             'token' => $jwtToken,
             'user'  => $appUser,
