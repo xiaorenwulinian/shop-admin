@@ -86,7 +86,7 @@
                             <td>{{$v->art_title}}</td>
                             <td>{{$v->art_desc}}</td>
                             <td>
-                                <a href="<?php echo url('edit',['id'=>$v->id,'page'=>request()->input('page',1)],false); ?>" title="编辑">编辑</a> |
+                                <a href="<?php echo url("backend/article/edit?id={$v->id}"); ?>" title="编辑">编辑</a> |
                                 <a href="javascript:void(0)" data-id="{{$v->id}}" class="cur_del" title="移除">删除</a>
                             </td>
                         </tr>

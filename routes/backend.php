@@ -13,14 +13,14 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::group(['prefix'=>'backend'],function ($route) {
+Route::group(['prefix'=>'backend','namespace'=>'Backend'],function ($route) {
     // 127.0.0.1:80/backend/test
-    $route->get('/','Backend\IndexController@index');
-    $route->get('mainContent','Backend\IndexController@mainContent');
-    $route->get('test','Backend\TestController@test');
+    $route->get('/','IndexController@index');
+    $route->get('mainContent','IndexController@mainContent');
+    $route->get('test','TestController@test');
 
-    $route->get('login','Backend\LoginController@login');
-    $route->group(['prefix'=>'category','namespace'=>'Backend'],function ($route) {
+    $route->get('login','LoginController@login');
+    $route->group(['prefix'=>'category'],function ($route) {
         $route->get('lst','CategoryController@lst');              //列表
         $route->get('add','CategoryController@add');              // 添加显示
         $route->post('addStore','CategoryController@addStore');   // 添加保存
@@ -29,8 +29,8 @@ Route::group(['prefix'=>'backend'],function ($route) {
         $route->post('delete','CategoryController@delete');       // 删除
     });
 
-    $route->group(['prefix'=>'article','namespace'=>'Backend'],function ($route) {
-        $route->get('lst','ArticleController@lst');              //列表
+    Route::group(['prefix'=>'article'],function ($route) {
+        $route->get('lst','ArticleController@lst');              // 列表
         $route->get('add','ArticleController@add');              // 添加显示
         $route->post('addStore','ArticleController@addStore');   // 添加保存
         $route->get('edit','ArticleController@edit');            // 修改显示

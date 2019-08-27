@@ -6,6 +6,7 @@ use App\Exceptions\JwtTokenException;
 use Exception;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Support\Facades\Response;
+use Illuminate\Validation\ValidationException;
 
 class Handler extends ExceptionHandler
 {
@@ -50,8 +51,22 @@ class Handler extends ExceptionHandler
     {
         if ($exception instanceof JwtTokenException) {
             return res_fail($exception->getMessage(),$exception->getCode());
+        }
+
+        if ($exception instanceof ValidationException) {
+            return res_fail(array_first(array_collapse($exception->errors())));
+        }
+        $isAjax  = $request->ajax();
+        if ($isAjax) {
+            $m = $exception->getMessage();
+            return res_fail($exception->getMessage());
         } else {
+            $m = $exception->getMessage();
+            dd($m);
             return parent::render($request, $exception);
         }
+
+
+
     }
 }
