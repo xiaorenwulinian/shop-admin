@@ -21,7 +21,7 @@ if (!function_exists('res_success')) {
             'msg'  => $message,
             'time' => time(),
             'data' => $data
-        ], $code, [])->setEncodingOptions(JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        ], 200, [])->setEncodingOptions(JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
     }
 }
 
@@ -41,12 +41,14 @@ if (!function_exists('res_fail')) {
 //            'data' => $data,
 //        ];
 //        return json_encode($ret,JSON_UNESCAPED_UNICODE);
+//        dd($message);
         return response()->json([
             'code' => $code,
             'msg'  => $message,
             'time' => time(),
             'data' => $data
-        ], $code, [])->setEncodingOptions(JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        ],200, [])->setEncodingOptions(JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+
     }
 }
 

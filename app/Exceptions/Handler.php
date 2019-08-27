@@ -2,9 +2,10 @@
 
 namespace App\Exceptions;
 
-use Exception;
 use App\Exceptions\JwtTokenException;
+use Exception;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Support\Facades\Response;
 
 class Handler extends ExceptionHandler
 {
@@ -35,9 +36,6 @@ class Handler extends ExceptionHandler
      */
     public function report(Exception $exception)
     {
-        if ($exception instanceof JwtTokenException) {
-            return res_fail($exception->getMessage(),403);
-        }
         parent::report($exception);
     }
 
@@ -50,6 +48,10 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Exception $exception)
     {
-        return parent::render($request, $exception);
+        if ($exception instanceof JwtTokenException) {
+            return res_fail($exception->getMessage(),$exception->getCode());
+        } else {
+            return parent::render($request, $exception);
+        }
     }
 }

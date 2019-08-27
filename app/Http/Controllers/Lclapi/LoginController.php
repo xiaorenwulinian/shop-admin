@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Lclapi;
 
+use App\Common\JwtToken\FirebaseJwtToken;
 use App\Model\AppUser;
 use Firebase\JWT\JWT;
 use Illuminate\Http\Request;
@@ -28,11 +29,11 @@ class LoginController extends Controller
        if (empty($pwd)) {
            return res_fail('请输入密码');
        }
-//        $appUser = DB::table('app_user')->where('phone','=',$phone)->get()->toArray();
-        $appUser = AppUser::where('phone','=',$phone)->first()->toArray();
+        $appUser = DB::table('app_user')->where('phone','=',$phone)->first();
         if (empty($appUser)) {
             return res_fail('手机号码不存在！');
         }
+        $appUser = (array)$appUser;
         $isValidate = Hash::check($pwd,$appUser['password']);
         if (!$isValidate) {
             return res_fail('密码错误');
@@ -47,13 +48,9 @@ class LoginController extends Controller
             "iat" => $time,
             "nbf" => $time,
             "exp" => $time + 3600,
-            "uid" => $appUser['id'],
-            "users" => $appUser, // 不建议存太多信息，用户ID和姓名即可，敏感信息会被窃取
+            "uid" => $appUser['id'], // 不建议存太多信息，用户ID和姓名即可，敏感信息会被窃取
         );
         $jwtToken = JWT::encode($secretToken, $secretKey);
-        $decoded = JWT::decode($jwtToken, $secretKey, array('HS256'));
-        $decoded_array = (array) $decoded;
-//        dd($jwtToken,$decoded_array,$decoded);
         $ret = [
             'token' => $jwtToken,
             'user'  => $appUser,
@@ -63,15 +60,9 @@ class LoginController extends Controller
 
     public function userInfo(Request $request)
     {
-        $header = $request->header();
-        $authorization = $request->header('authorization');
-        $authorizationArr = explode(' ',$authorization);
-        $jwt = $authorizationArr[1];
-        $key = 'app_user_token';
-        JWT::$leeway = 40 ; // $leeway in seconds  token 过期时间到期，延迟失效 单位秒
-        $decoded = JWT::decode($jwt, $key, array('HS256'));
-        $decoded_array = (array) $decoded;
-        dd($header,$authorization,$jwt,$decoded,$decoded_array);
+        // 获取用户ID
+        $uid = FirebaseJwtToken::getInstance()->lclUserId;
+        dd($uid);
     }
 
     /**

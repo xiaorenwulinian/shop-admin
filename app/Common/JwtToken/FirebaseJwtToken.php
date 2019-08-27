@@ -9,6 +9,10 @@ use Firebase\JWT\JWT;
 class FirebaseJwtToken
 {
     protected static $instance ;
+    public $lclUserId ;
+    public $appUserId ;
+    public $backendUserId ;
+    public $miniProgramUserId ;
     private function __construct()
     {
 
@@ -32,19 +36,23 @@ class FirebaseJwtToken
      */
     public function lclApiUserId()
     {
+        $secretKey = 'app_user_token';
         try {
             $authorization = request()->header('authorization');
             $authorizationArr = explode(' ', $authorization);
             $jwtToken = $authorizationArr[1];
-            $secretKey = 'app_user_token';
             JWT::$leeway = 40; // $leeway in seconds  token 过期时间到期，延迟失效 单位秒
             $decoded = JWT::decode($jwtToken, $secretKey, array('HS256'));
-            $decoded_array = (array)$decoded;
+            $decodedArray = (array)$decoded;
+            $uid =  $decodedArray['uid'];
+
         } catch (\Exception $exception) {
             throw new JwtTokenException($exception->getMessage());
         }
-        return $decoded_array['id'];
+        $this->lclUserId = $uid;
+        return $uid;
     }
+
 
     /**
      * 前后端分离后 token验证，获取当前用户ID
@@ -52,16 +60,21 @@ class FirebaseJwtToken
      */
     public function backendApiUserId()
     {
-        $authorization = request()->header('authorization');
-        $authorizationArr = explode(' ', $authorization);
-        $jwtToken = $authorizationArr[1];
         $secretKey = 'backend_token';
-        JWT::$leeway = 40; // $leeway in seconds  token 过期时间到期，延迟失效 单位秒
-        $decoded = JWT::decode($jwtToken, $secretKey, array('HS256'));
-        $decoded_array = (array)$decoded;
-        return $decoded_array['id'];
+        try {
+            $authorization = request()->header('authorization');
+            $authorizationArr = explode(' ', $authorization);
+            $jwtToken = $authorizationArr[1];
+            JWT::$leeway = 40; // $leeway in seconds  token 过期时间到期，延迟失效 单位秒
+            $decoded = JWT::decode($jwtToken, $secretKey, array('HS256'));
+            $decodedArray = (array)$decoded;
+            $uid =  $decodedArray['uid'];
+        } catch (\Exception $exception) {
+            throw new JwtTokenException($exception->getMessage());
+        }
+        $this->backendUserId = $uid;
+        return $uid;
     }
-
 
     /**
      * App ios / android token验证，获取当前用户ID
@@ -69,14 +82,20 @@ class FirebaseJwtToken
      */
     public function AppApiUserId()
     {
-        $authorization = request()->header('authorization');
-        $authorizationArr = explode(' ', $authorization);
-        $jwtToken = $authorizationArr[1];
         $secretKey = 'app_token';
-        JWT::$leeway = 40; // $leeway in seconds  token 过期时间到期，延迟失效 单位秒
-        $decoded = JWT::decode($jwtToken, $secretKey, array('HS256'));
-        $decoded_array = (array)$decoded;
-        return $decoded_array['id'];
+        try {
+            $authorization = request()->header('authorization');
+            $authorizationArr = explode(' ', $authorization);
+            $jwtToken = $authorizationArr[1];
+            JWT::$leeway = 40; // $leeway in seconds  token 过期时间到期，延迟失效 单位秒
+            $decoded = JWT::decode($jwtToken, $secretKey, array('HS256'));
+            $decodedArray = (array)$decoded;
+            $uid =  $decodedArray['uid'];
+        } catch (\Exception $exception) {
+            throw new JwtTokenException($exception->getMessage());
+        }
+        $this->appUserId = $uid;
+        return $uid;
     }
 
     /**
@@ -85,14 +104,20 @@ class FirebaseJwtToken
      */
     public function miniProgramApiUserId()
     {
-        $authorization = request()->header('authorization');
-        $authorizationArr = explode(' ', $authorization);
-        $jwtToken = $authorizationArr[1];
         $secretKey = 'mini_program_token';
-        JWT::$leeway = 40; // $leeway in seconds  token 过期时间到期，延迟失效 单位秒
-        $decoded = JWT::decode($jwtToken, $secretKey, array('HS256'));
-        $decoded_array = (array)$decoded;
-        return $decoded_array['id'];
+        try {
+            $authorization = request()->header('authorization');
+            $authorizationArr = explode(' ', $authorization);
+            $jwtToken = $authorizationArr[1];
+            JWT::$leeway = 40; // $leeway in seconds  token 过期时间到期，延迟失效 单位秒
+            $decoded = JWT::decode($jwtToken, $secretKey, array('HS256'));
+            $decodedArray = (array)$decoded;
+            $uid =  $decodedArray['uid'];
+        } catch (\Exception $exception) {
+            throw new JwtTokenException($exception->getMessage());
+        }
+        $this->miniProgramUserId = $uid;
+        return $uid;
     }
 
 

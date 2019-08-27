@@ -22,14 +22,9 @@ Route::group(['prefix'=>'lclapi','namespace'=>'Lclapi'],function ($route) {
         $route->any('login','LoginController@login');
         $route->any('register','LoginController@register');
 
-        $route->any('userinfo','LoginController@userInfo');
     });
 
-    Route::group(['middleware'=>''],function ($route) {
-        $route->get('/','IndexController@index');
-        $route->any('test','TestController@test');
-        $route->any('login','LoginController@login');
-        $route->any('register','LoginController@register');
+    Route::group(['middleware'=>'lcltoken'],function ($route) {
 
         $route->any('userinfo','LoginController@userInfo');
     });
