@@ -10,10 +10,10 @@ use Illuminate\Support\Facades\DB;
 
 class ArticleController extends BackendBaseController
 {
-//    public function __construct()
-//    {
-//        parent::__construct();
-//    }
+    public function __construct()
+    {
+        parent::__construct();
+    }
 
     public function lst(Request $request)
     {

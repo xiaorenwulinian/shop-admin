@@ -19,7 +19,8 @@ Route::group(['prefix'=>'backend','namespace'=>'Backend'],function ($route) {
     $route->get('mainContent','IndexController@mainContent');
     $route->get('test','TestController@test');
 
-    $route->get('login','LoginController@login');
+    Route::get('login','LoginController@login');
+    $route->post('loginSubmit','LoginController@loginSubmit');
     $route->group(['prefix'=>'category'],function ($route) {
         $route->get('lst','CategoryController@lst');              //列表
         $route->get('add','CategoryController@add');              // 添加显示
