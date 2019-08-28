@@ -1,99 +1,145 @@
-<!doctype html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title>Laravel</title>
+@extends('backend.layout.basic')
 
-        <!-- Fonts -->
-        <link href="https://fonts.googleapis.com/css?family=Nunito:200,600" rel="stylesheet">
+@section('style')
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <!-- Styles -->
-        <style>
-            html, body {
-                background-color: #fff;
-                color: #636b6f;
-                font-family: 'Nunito', sans-serif;
-                font-weight: 200;
-                height: 100vh;
-                margin: 0;
-            }
+@endsection
 
-            .full-height {
-                height: 100vh;
-            }
+@section('content')
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <h1>
+        文章添加
+        <small> <a href="javascript:void(0);" onclick="window.history.back();" class="pull-right">文章列表</a></small>
 
-            .flex-center {
-                align-items: center;
-                display: flex;
-                justify-content: center;
-            }
+    </h1>
 
-            .position-ref {
-                position: relative;
-            }
+</section>
 
-            .top-right {
-                position: absolute;
-                right: 10px;
-                top: 18px;
-            }
-
-            .content {
-                text-align: center;
-            }
-
-            .title {
-                font-size: 84px;
-            }
-
-            .links > a {
-                color: #636b6f;
-                padding: 0 25px;
-                font-size: 13px;
-                font-weight: 600;
-                letter-spacing: .1rem;
-                text-decoration: none;
-                text-transform: uppercase;
-            }
-
-            .m-b-md {
-                margin-bottom: 30px;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="flex-center position-ref full-height">
-            @if (Route::has('login'))
-                <div class="top-right links">
-                    @auth
-                        <a href="{{ url('/home') }}">Home</a>
-                    @else
-                        <a href="{{ route('login') }}">Login</a>
-
-                        @if (Route::has('register'))
-                            <a href="{{ route('register') }}">Register</a>
-                        @endif
-                    @endauth
+<section class="content">
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="box-header">
+                    <h3 class="box-title"></h3>
                 </div>
-            @endif
+                <div class="box-body">
+                    <form class="form-horizontal" id="formSubmit" action="">
 
-            <div class="content">
-                <div class="title m-b-md">
-                    Laravel
-                </div>
+                        <div class="form-group">
+                            <label for="" class="col-sm-2 control-label">所属分类：</label>
+                            <div class="col-sm-9">
+                                <select name="type_id" id="type_id" class="form-control">
+                                    <option value="0">选择分类</option>
+                                    <?php foreach($cateData as $k=>$v):?>
+                                    <option value="{{$v['id']}}">
+                                        <?php echo str_repeat('-', 8*$v['level']).$v['title']; ?>
+                                    </option>
+                                    <?php endforeach;?>
+                                </select>
+                            </div>
+                        </div>
 
-                <div class="links">
-                    <a href="https://laravel.com/docs">Docs</a>
-                    <a href="https://laracasts.com">Laracasts</a>
-                    <a href="https://laravel-news.com">News</a>
-                    <a href="https://blog.laravel.com">Blog</a>
-                    <a href="https://nova.laravel.com">Nova</a>
-                    <a href="https://forge.laravel.com">Forge</a>
-                    <a href="https://github.com/laravel/laravel">GitHub</a>
+                        <div class="form-group">
+                            <label for="art_title" class="col-sm-2 control-label">文章标题：</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" name="art_title" id="art_title">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="art_desc" class="col-sm-2 control-label">文章描述：</label>
+                            <div class="col-sm-9">
+                                <textarea class="form-control" rows="3" name="art_desc" id="art_desc"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="" class="col-sm-2 control-label">文章内容</label>
+                            <div class="col-sm-9">
+                                <textarea id="art_content" name="art_content"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="col-sm-offset-2 col-sm-10">
+                                <button type="submit"  class=" curSubmit btn btn-primary  btn-lg">提交</button>
+                            </div>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
-    </body>
-</html>
+    </div>
+</section>
+<div style="margin-bottom: 100px;"></div>
+@endsection
+
+@section('script')
+    <script src="/static/backend/ueditor/ueditor.config.js" type="text/javascript" ></script>
+    <script src="/static/backend/ueditor/ueditor.all.min.js" type="text/javascript" ></script>
+    <!--建议手动加在语言，避免在ie下有时因为加载语言失败导致编辑器加载失败-->
+    <!--这里加载的语言文件会覆盖你在配置项目里添加的语言类型，比如你在配置项目里配置的是英文，这里加载的中文，那最后就是中文-->
+    <script src="/static/backend/ueditor/lang/zh-cn/zh-cn.js" type="text/javascript" ></script>
+    <script>
+        $(function () {
+
+            var cur_ue = UE.getEditor('art_content', {
+                "initialFrameWidth" : "100%",   // 宽
+                "initialFrameHeight" : 600,      // 高
+                "maximumWords" : 10000            // 最大可以输入的字符数量
+            });
+
+
+            $('.curSubmit').on('click',function () {
+                var type_id = $('#type_id').val();
+                if (type_id == '' || type_id == 0) {
+                    layer.msg("请选择所属类别!", {icon: 5,time:2000});
+                    return false;
+                }
+
+                var art_title = $('#art_title').val();
+                if (art_title == '' || art_title.length == 0) {
+                    layer.msg("请输入文章标题!", {icon: 5,time:2000});
+                    return false;
+                }
+                var art_desc = $('#art_desc').val();
+                var art_content = cur_ue.getContent(); // UEditor 内容
+                var url = "<?php echo url('backend/article/addStore');?>";
+    //            var form_param = $('#formSubmit').serialize();
+                $.ajax({
+                    type: 'post',
+                    url:  url,
+                    dataType: 'json',
+                    data: {
+                        type_id : type_id,
+                        art_title : art_title,
+                        art_desc : art_desc,
+                        art_content : art_content
+                    },
+                    headers:{
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function(ret){
+                        console.log(ret);
+                        if(ret.code == 200) {
+                            layer.msg('添加成功',{
+                                time:1000,
+                                icon: 6,
+                                end:function () {
+    //                               location.reload();
+                                    location.href = "<?php echo url('backend/article/lst');?>";
+                                }
+                            })
+                        } else {
+                            layer.msg(ret.msg, {icon: 5,time:1000,});
+                            return false;
+                        }
+                    }
+                });
+                return false;
+            });
+
+        })
+    </script>
+@endsection

@@ -96,7 +96,7 @@
                 success: function(ret){
                     console.log(ret);
                     if(ret.code == 200) {
-                        location.href = "<?php echo url('backend');?>";
+                        top.location.href = "<?php echo url('backend');?>";
                     } else {
                         $('.error_msg').text(ret.msg);
                         return false;

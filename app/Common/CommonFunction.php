@@ -9,7 +9,7 @@ if (!function_exists('res_success')) {
      * @param int $code
      * @return false|string
      */
-    function res_success ($data = [], $message = '',$code = 200) {
+    function res_success ($data = [], $message = '请求成功',$code = 200) {
 //        $ret = [
 //            'code' => $code,
 //            'msg'  => $message,
@@ -34,7 +34,7 @@ if (!function_exists('res_fail')) {
      * @return false|string
      *
      */
-    function res_fail ($message = '', $code = 404, $data = []) {
+    function res_fail ($message = '请求失败', $code = 404, $data = []) {
 //        $ret = [
 //            'code' => $code,
 //            'msg'  => $message,

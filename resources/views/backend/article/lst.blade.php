@@ -133,7 +133,7 @@
          */
         $('.cur_del').on('click',function () {
             var id = $(this).attr('data-id');
-            var url = "<?php echo url('delete','',false);?>";
+            var url = "<?php echo url('backend/article/delete');?>";
             delete_one(url, id);
         });
         $('.is_multi_select').on('click',function () {
@@ -161,7 +161,7 @@
                 alert('请勾选删除项！');
                 return false;
             }
-            var url = "{:url('multiDelete','',false)}";
+            var url = "<?php echo url('backend/article/multiDelete');?>";
 
             delete_multiply(url, has_checked_str);
 

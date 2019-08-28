@@ -10,7 +10,7 @@ class Article extends Model
     protected $table = 'article';
     public $timestamps = false;
     protected $fillable = [
-        'art_title','art_desc','art_content','type',
+        'art_title','art_desc','art_content','type_id',
         'order_id','add_time','edit_time'
     ];
 

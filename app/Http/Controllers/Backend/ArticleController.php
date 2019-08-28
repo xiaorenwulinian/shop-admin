@@ -8,6 +8,7 @@ use App\Model\Article;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Backend\BackendBaseController;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class ArticleController extends BackendBaseController
 {
@@ -37,6 +38,47 @@ class ArticleController extends BackendBaseController
         return view('backend.article.lst', $ret);
     }
 
+    /**
+     * 添加文章
+     */
+    public function add()
+    {
+        $cateData = DB::table('category')->get();
+        $cateData = $this->getTree($cateData);
+        $ret = [
+            'cateData' => $cateData,
+        ];
+        return view('backend.article.add', $ret);
+    }
+
+    public function addStore(Request $request)
+    {
+        $this->validate($request, [
+            'type_id'        => 'required|numeric',
+            'art_title'      => 'required|max:255',
+            'art_content'    => 'required'
+        ],[
+            'type_id.required'     => '文章分类必传',
+            'art_title.id'         => '文章标题应必传！',
+            'art_title.max'        => '文章标题应小于255个字！',
+        ]);
+        $data = $request->input();
+        foreach ($data as $k=>$v) {
+            if (empty($v)) {
+                unset($data[$k]);
+            }
+        }
+        $data['add_time'] = time();
+        Article::create($data);
+        return res_success();
+    }
+
+    /**
+     * 修改显示
+     * @param Request $request
+     * @return false|\Illuminate\Contracts\View\Factory|\Illuminate\View\View|string
+     * @throws \Illuminate\Validation\ValidationException
+     */
     public function edit(Request $request)
     {
         $this->validate($request, [
@@ -59,6 +101,11 @@ class ArticleController extends BackendBaseController
         return view('backend.article.edit', $ret);
     }
 
+    /**
+     * 修改保存
+     * @param ArticleEditStoresRequest $request
+     * @return false|string
+     */
     public function editStore(ArticleEditStoresRequest $request)
     {
 
@@ -73,6 +120,24 @@ class ArticleController extends BackendBaseController
         $article->art_content = $reqData['art_content'];
         $article->save();
         return res_success([],'修改成功');
+    }
+
+    public function delete(Request $request)
+    {
+        $id = $request->input('id');
+        $isExist = Article::find($id);
+        if (empty($isExist)) {
+            return res_fail('非法攻击');
+        }
+        Article::delete($id);
+        return res_success();
+    }
+
+    public function multiDelete(Request $request)
+    {
+        $ids = $request->input('ids');
+        DB::table('article')->whereIn('id',explode($ids))->delete();
+        return res_success();
     }
 
     /**

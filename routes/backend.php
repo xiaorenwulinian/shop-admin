@@ -39,7 +39,8 @@ Route::group(['prefix'=>'backend','namespace'=>'Backend'],function ($route) {
             Route::post('addStore','ArticleController@addStore');   // 添加保存
             Route::get('edit','ArticleController@edit');            // 修改显示
             Route::post('editStore','ArticleController@editStore'); // 修改保存
-            Route::post('delete','ArticleController@delete');       // 删除
+            Route::post('delete','ArticleController@delete');       // 删除单个
+            Route::post('multiDelete','ArticleController@multiDelete');       // 批量删除
         });
         Route::group(['prefix'=>'user'],function ($route) {
             Route::get('index',function () {

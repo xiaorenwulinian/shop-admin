@@ -15,7 +15,7 @@ function delete_one(url, del_id){
             data: {id: del_id},
             success: function(ret){
                 console.log(ret);
-                if(ret.code == 0) {
+                if(ret.code == 200) {
                     layer.msg('删除成功',{
                         time:1000, icon: 6,
                         end:function () {
@@ -53,7 +53,7 @@ function delete_multiply(url, del_ids){
                 },
                 success: function(ret){
                     console.log(ret);
-                    if(ret.code == 0) {
+                    if(ret.code == 200) {
                         layer.msg('删除成功',{
                             time:1000, icon: 6,
                             end:function () {
