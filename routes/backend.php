@@ -15,32 +15,38 @@ use Illuminate\Support\Facades\Route;
 
 Route::group(['prefix'=>'backend','namespace'=>'Backend'],function ($route) {
     // 127.0.0.1:80/backend/test
-    $route->get('/','IndexController@index');
-    $route->get('mainContent','IndexController@mainContent');
-    $route->get('test','TestController@test');
+
+    Route::get('mainContent','IndexController@mainContent');
+    Route::get('test','TestController@test');
 
     Route::get('login','LoginController@login');
-    $route->post('loginSubmit','LoginController@loginSubmit');
-    $route->group(['prefix'=>'category'],function ($route) {
-        $route->get('lst','CategoryController@lst');              //列表
-        $route->get('add','CategoryController@add');              // 添加显示
-        $route->post('addStore','CategoryController@addStore');   // 添加保存
-        $route->get('edit','CategoryController@edit');            // 修改显示
-        $route->post('editStore','CategoryController@editStore'); // 修改保存
-        $route->post('delete','CategoryController@delete');       // 删除
-    });
+    Route::post('loginSubmit','LoginController@loginSubmit');
 
-    Route::group(['prefix'=>'article'],function ($route) {
-        $route->get('lst','ArticleController@lst');              // 列表
-        $route->get('add','ArticleController@add');              // 添加显示
-        $route->post('addStore','ArticleController@addStore');   // 添加保存
-        $route->get('edit','ArticleController@edit');            // 修改显示
-        $route->post('editStore','ArticleController@editStore'); // 修改保存
-        $route->post('delete','ArticleController@delete');       // 删除
-    });
-    $route->group(['prefix'=>'user'],function ($route) {
-        $route->get('index',function () {
-            return 'mini user index';
+    Route::group(['middleware' => 'backend_login'], function ($route) {
+        Route::get('/','IndexController@index');
+        Route::group(['prefix'=>'category'],function ($route) {
+            Route::get('lst','CategoryController@lst');              //列表
+            Route::get('add','CategoryController@add');              // 添加显示
+            Route::post('addStore','CategoryController@addStore');   // 添加保存
+            Route::get('edit','CategoryController@edit');            // 修改显示
+            Route::post('editStore','CategoryController@editStore'); // 修改保存
+            Route::post('delete','CategoryController@delete');       // 删除
+        });
+
+        Route::group(['prefix'=>'article'],function ($route) {
+            Route::get('lst','ArticleController@lst');              // 列表
+            Route::get('add','ArticleController@add');              // 添加显示
+            Route::post('addStore','ArticleController@addStore');   // 添加保存
+            Route::get('edit','ArticleController@edit');            // 修改显示
+            Route::post('editStore','ArticleController@editStore'); // 修改保存
+            Route::post('delete','ArticleController@delete');       // 删除
+        });
+        Route::group(['prefix'=>'user'],function ($route) {
+            Route::get('index',function () {
+                return 'mini user index';
+            });
         });
     });
+
+
 });

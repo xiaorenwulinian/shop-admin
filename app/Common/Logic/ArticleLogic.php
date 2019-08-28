@@ -25,6 +25,11 @@ class ArticleLogic
         return self::$instance;
     }
 
+    /**
+     * 后台 文章搜索
+     * @param $page_size
+     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
+     */
     public function search($page_size)
     {
         $where = [];
@@ -65,9 +70,9 @@ class ArticleLogic
             ->select($select_filed)
             ->orderBy('a.id','desc')
             ->paginate($page_size);
-//            ->paginate($page_size,false,['query' => request()-
         $list->appends($request->input());
         return $list;
     }
+
 
 }

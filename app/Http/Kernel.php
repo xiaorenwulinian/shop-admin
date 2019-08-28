@@ -84,6 +84,7 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
 
         'lcltoken' => \App\Http\Middleware\LclTokenValidate::class,
+        'backend_login' => \App\Http\Middleware\BackendLoginMiddleware::class,
     ];
 
     /**
@@ -101,6 +102,8 @@ class Kernel extends HttpKernel
         \Illuminate\Routing\Middleware\SubstituteBindings::class,
         \Illuminate\Auth\Middleware\Authorize::class,
         \App\Http\Middleware\LclTokenValidate::class,
+        \App\Http\Middleware\BackendLoginMiddleware::class,
+
 
     ];
 }

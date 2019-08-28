@@ -21,7 +21,7 @@
     <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
     <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
-
+    <meta name="csrf-token" content="{{csrf_token()}}">
     <!-- Google Font -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
 </head>
@@ -59,11 +59,11 @@
 <!-- /.login-box -->
 
 <!-- jQuery 3 -->
-<script src="/bower_components/jquery/dist/jquery.min.js"></script>
+<script src="/static/backend/jquery/dist/jquery.min.js"></script>
 <!-- Bootstrap 3.3.7 -->
-<script src="/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+<script src="/static/backend/bootstrap/dist/js/bootstrap.min.js"></script>
 <!-- iCheck -->
-<script src="../../plugins/iCheck/icheck.min.js"></script>
+{{--<script src="../../plugins/iCheck/icheck.min.js"></script>--}}
 <script>
     $(function () {
 
@@ -86,8 +86,12 @@
                 url:  url,
                 dataType: 'json',
                 data: {
-                    phone: username,
-                    pwd: password,
+                    username: username,
+                    password: password,
+                    password: password,
+                },
+                headers:{
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 },
                 success: function(ret){
                     console.log(ret);

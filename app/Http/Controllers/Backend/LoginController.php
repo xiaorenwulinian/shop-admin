@@ -22,24 +22,24 @@ class LoginController extends Controller
 
     public function loginSubmit(Request $request)
     {
-        $phone = $request->input('phone');
-        $pwd = $request->input('pwd');
-        if (!preg_match('/^1[3-9]\d{9}$/', $phone)) {
-            return res_fail([], '请输入正确的手机号码');
+        $username = $request->input('username');
+        $pwd = $request->input('password');
+//        if (!preg_match('/^1[3-9]\d{9}$/', $phone)) {
+//            return res_fail([], '请输入正确的手机号码');
+//        }
+        if (empty($pwd) || empty($username)) {
+            return res_fail('用户名和密码不能为空！');
         }
-        if (empty($pwd)) {
-            return res_fail('请输入密码');
+        $adminUser = DB::table('admin')->where('username', '=', $username)->first();
+        if (empty($adminUser)) {
+            return res_fail('该用户不存在！');
         }
-        $appUser = DB::table('app_user')->where('phone', '=', $phone)->first();
-        if (empty($appUser)) {
-            return res_fail('手机号码不存在！');
-        }
-        $appUser = (array)$appUser;
-        $isValidate = Hash::check($pwd, $appUser['password']);
+        $adminUser = (array)$adminUser;
+        $isValidate = Hash::check($pwd, $adminUser['password']);
         if (!$isValidate) {
             return res_fail('密码错误');
         }
-        session('admin_user_id',$appUser['id']);
+        session(['admin_user_id' => $adminUser['id']]);
         return res_success([],'登陆成功！');
     }
 
