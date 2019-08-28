@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\backend;
 
+use App\Common\Logic\ArticleLogic;
 use App\Http\Requests\ArticleEditStoresRequest;
 use App\Model\Article;
 use Illuminate\Http\Request;
@@ -21,8 +22,8 @@ class ArticleController extends BackendBaseController
         $page_size = $request->input('page_size',$default_page_size);
         $page_size_select = page_size_select($page_size); //生成下拉选择页数框
         $cat_data = DB::table('category')->get();
-        $article = new Article();
-        $list = $article->search($page_size);
+        $articleLogic = ArticleLogic::getInstance();
+        $list = $articleLogic->search($page_size);
         $page = $list->render();
         $cur_page = $request->input('page',1);
         $ret = [
