@@ -6,13 +6,51 @@ use App\Common\Library\Tools\FirebaseJwtToken;
 use App\Common\Library\Tools\StingTool;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\DB;
 
 class TestController extends Controller
 {
     public function test(Request $request)
     {
+        $this->partitionKey();
 //        $this->String();
-        $this->excel();
+//        $this->excel();
+    }
+
+    /**
+     * 测试 性能
+     */
+    private function partitionKey()
+    {
+        set_time_limit(0);
+        $begin = time();
+
+        for ($i = 0 ; $i < 50000; $i++) {
+            $insert = [];
+            for ($j = 0 ; $j < 1000 ; $j++ ) {
+                $temp = [
+                    'age' => rand(0,100),
+                    'title' => StingTool::randCode(8,false),
+                ];
+                array_push($insert, $temp);
+            }
+            DB::table('test_partition_key_02')->insert($insert);
+        }
+
+
+        /*
+        $data= DB::table('test_partition_key_01')
+            ->whereBetween('age',[50,80])
+            ->limit(100)
+            ->get();
+        */
+
+        $end = time();
+        $gap = $end - $begin ;
+        // 1000 , key_01 === 379s
+        // 1000 , key_02 === 400s
+//        $inset= DB::table('test_partition_key_01')->first();
+        dd($gap);
     }
     private function String()
     {

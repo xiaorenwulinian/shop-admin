@@ -136,7 +136,7 @@ class ArticleController extends BackendBaseController
     public function multiDelete(Request $request)
     {
         $ids = $request->input('ids');
-        DB::table('article')->whereIn('id',explode($ids))->delete();
+        DB::table('article')->whereIn('id',explode(',',$ids))->delete();
         return res_success();
     }
 
