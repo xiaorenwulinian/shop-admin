@@ -42,6 +42,19 @@ Route::group(['prefix'=>'backend','namespace'=>'Backend'],function ($route) {
             Route::post('delete','ArticleController@delete');       // 删除单个
             Route::post('multiDelete','ArticleController@multiDelete');       // 批量删除
         });
+
+        /**
+         * 商品分类
+         */
+        Route::group(['prefix'=>'goodsCategory'],function ($route) {
+            Route::get('lst','GoodsCategoryController@lst');              //列表
+            Route::get('add','GoodsCategoryController@add');              // 添加显示
+            Route::post('addStore','GoodsCategoryController@addStore');   // 添加保存
+            Route::get('edit','GoodsCategoryController@edit');            // 修改显示
+            Route::post('editStore','GoodsCategoryController@editStore'); // 修改保存
+            Route::post('delete','GoodsCategoryController@delete');       // 删除
+        });
+
         Route::group(['prefix'=>'user'],function ($route) {
             Route::get('index',function () {
                 return 'mini user index';
