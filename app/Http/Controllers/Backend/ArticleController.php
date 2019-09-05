@@ -8,7 +8,6 @@ use App\Model\Article;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Backend\BackendBaseController;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
 
 class ArticleController extends BackendBaseController
 {
@@ -17,6 +16,11 @@ class ArticleController extends BackendBaseController
         parent::__construct();
     }
 
+    /**
+     * 列表
+     * @param Request $request
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
     public function lst(Request $request)
     {
         $default_page_size = 10; // 每一页默认显示的条数
@@ -39,7 +43,7 @@ class ArticleController extends BackendBaseController
     }
 
     /**
-     * 添加文章
+     * 添加显示
      */
     public function add()
     {
@@ -51,6 +55,12 @@ class ArticleController extends BackendBaseController
         return view('backend.article.add', $ret);
     }
 
+    /**
+     * 添加保存
+     * @param Request $request
+     * @return false|string
+     * @throws \Illuminate\Validation\ValidationException
+     */
     public function addStore(Request $request)
     {
         $this->validate($request, [
@@ -122,6 +132,12 @@ class ArticleController extends BackendBaseController
         return res_success([],'修改成功');
     }
 
+    /**
+     * 删除单个
+     * @param Request $request
+     * @return false|string
+     * @throws \Exception
+     */
     public function delete(Request $request)
     {
         $id = $request->input('id');
@@ -133,6 +149,11 @@ class ArticleController extends BackendBaseController
         return res_success();
     }
 
+    /**
+     * 批量删除
+     * @param Request $request
+     * @return false|string
+     */
     public function multiDelete(Request $request)
     {
         $ids = $request->input('ids');
