@@ -79,7 +79,18 @@ Route::group(['prefix'=>'backend','namespace'=>'Backend'],function ($route) {
             Route::any('delete','AttributeController@delete');       // 删除
             Route::any('multiDelete','AttributeController@multiDelete');       // 批量删除
         });
-
+        /**
+         * 会员级别
+         */
+        Route::group(['prefix'=>'memberLevel'],function ($route) {
+            Route::get('lst','MemberLevelController@lst');              //列表
+            Route::get('add','MemberLevelController@add');              // 添加显示
+            Route::post('addStore','MemberLevelController@addStore');   // 添加保存
+            Route::get('edit','MemberLevelController@edit');            // 修改显示
+            Route::post('editStore','MemberLevelController@editStore'); // 修改保存
+            Route::any('delete','MemberLevelController@delete');       // 删除
+            Route::any('multiDelete','MemberLevelController@multiDelete');       // 批量删除
+        });
         /**
          * 商品品牌
          */

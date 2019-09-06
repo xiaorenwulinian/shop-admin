@@ -56,7 +56,6 @@
     $(function () {
 
         var type_id = "<?php echo $typeData['id'];?>";
-        alert(type_id);
         $('.curSubmit').on('click',function () {
 
             var type_name = $('#type_name').val();
