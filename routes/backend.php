@@ -108,6 +108,21 @@ Route::group(['prefix'=>'backend','namespace'=>'Backend'],function ($route) {
             Route::any('editDeleteImg','BrandController@editDeleteImg'); // 修改时删除图片
         });
 
+
+        /**
+         * 商品
+         */
+        Route::group(['prefix'=>'goods'],function ($route) {
+            Route::get('lst','GoodsController@lst');              //列表
+            Route::get('add','GoodsController@add');              // 添加显示
+            Route::post('addStore','GoodsController@addStore');   // 添加保存
+            Route::get('edit','GoodsController@edit');            // 修改显示
+            Route::post('editStore','GoodsController@editStore'); // 修改保存
+            Route::any('delete','GoodsController@delete');        // 删除
+            Route::any('multiDelete','GoodsController@multiDelete');   // 批量删除
+
+        });
+
         Route::group(['prefix'=>'user'],function ($route) {
             Route::get('index',function () {
                 return 'mini user index';
