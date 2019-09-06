@@ -67,6 +67,18 @@ Route::group(['prefix'=>'backend','namespace'=>'Backend'],function ($route) {
             Route::any('delete','TypeController@delete');       // 删除
             Route::any('multiDelete','TypeController@multiDelete');       // 批量删除
         });
+        /**
+         * 商品属性
+         */
+        Route::group(['prefix'=>'attribute'],function ($route) {
+            Route::get('lst','AttributeController@lst');              //列表
+            Route::get('add','AttributeController@add');              // 添加显示
+            Route::post('addStore','AttributeController@addStore');   // 添加保存
+            Route::get('edit','AttributeController@edit');            // 修改显示
+            Route::post('editStore','AttributeController@editStore'); // 修改保存
+            Route::any('delete','AttributeController@delete');       // 删除
+            Route::any('multiDelete','AttributeController@multiDelete');       // 批量删除
+        });
 
         /**
          * 商品品牌
