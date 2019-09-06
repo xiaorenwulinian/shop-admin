@@ -285,3 +285,31 @@ function dingding_robot($content)
     $client = new \GuzzleHttp\Client();
     $client->post($url, ['headers' => ['Content-Type' => 'application/json'], 'body' => \GuzzleHttp\json_encode($body, JSON_UNESCAPED_UNICODE)]);
 }
+
+if (!function_exists('show_image')) {
+
+    /**
+     * 图片展示
+     * @param string $url
+     * @param string $width
+     * @param string $height
+     * @param string $alt
+     * @return string
+     */
+    function show_image($url = '', $width = '', $height ='' , $alt='' ) {
+        if (empty($url)) {
+            $url = "/favicon.ico";
+        }
+        if (!empty($width)) {
+            $width = "width = '{$width}'";
+        }
+        if (!empty($width)) {
+            $height = "height = '{$height}'";
+        }
+        if (empty($alt)) {
+            $alt  = '图片加载中';
+        }
+        return "<img src='{$url}' $width $height alt='{$alt}' />";
+    }
+}
+

@@ -68,6 +68,23 @@ Route::group(['prefix'=>'backend','namespace'=>'Backend'],function ($route) {
             Route::any('multiDelete','TypeController@multiDelete');       // 批量删除
         });
 
+        /**
+         * 商品品牌
+         */
+        Route::group(['prefix'=>'brand'],function ($route) {
+            Route::get('lst','BrandController@lst');              //列表
+            Route::get('add','BrandController@add');              // 添加显示
+            Route::post('addStore','BrandController@addStore');   // 添加保存
+            Route::get('edit','BrandController@edit');            // 修改显示
+            Route::post('editStore','BrandController@editStore'); // 修改保存
+            Route::any('delete','BrandController@delete');        // 删除
+            Route::any('multiDelete','BrandController@multiDelete');   // 批量删除
+            Route::any('addUpload','BrandController@addUpload');       // 添加时上传图片
+            Route::any('addDeleteImg','BrandController@addDeleteImg'); // 添加时删除图片
+            Route::any('editUpload','BrandController@editUpload');       // 修改时上传图片
+            Route::any('editDeleteImg','BrandController@editDeleteImg'); // 修改时删除图片
+        });
+
         Route::group(['prefix'=>'user'],function ($route) {
             Route::get('index',function () {
                 return 'mini user index';
