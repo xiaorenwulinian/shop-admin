@@ -128,6 +128,27 @@ Route::group(['prefix'=>'backend','namespace'=>'Backend'],function ($route) {
                 return 'mini user index';
             });
         });
+
+
+        # 用户管理
+        Route::group(['prefix'=>'admin'],function ($route) {
+            Route::get('lst', 'AdminController@lst')->name('admin');              //列表
+            Route::match(['get', 'post'], 'add', 'AdminController@add');                // 新增
+            Route::match(['get', 'post'], 'edit/{id}', 'AdminController@edit');         // 编辑
+            Route::get('delete/{id}', 'AdminController@delete');                        // 删除
+            Route::post('changeStatus', 'AdminController@changeStatus');                // 修改状态
+        });
+
+        # 角色管理
+        Route::group(['prefix'=>'role'],function ($route) {
+
+        });
+
+        # 权限管理
+        Route::group(['prefix'=>'privilege'],function ($route) {
+
+        });
+
     });
 
 

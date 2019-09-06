@@ -2,7 +2,7 @@
 
 namespace App\Common\Library\Tools;
 
-class StingTool
+class FileTool
 {
     /**
      * 生成随机字符串
