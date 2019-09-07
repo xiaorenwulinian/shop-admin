@@ -58,7 +58,7 @@
                                         </div>
                                         <label for="" class="col-sm-2 control-label">品牌：</label>
                                         <div class="col-sm-3">
-                                            <select name="type_id" id="type_id" class="form-control">
+                                            <select name="brand_id" id="brand_id" class="form-control">
                                                 <option value="0">选择品牌</option>
                                                 <?php foreach($brandData as $k=>$v): ?>
                                                 <?php $v = (array)$v;?>
@@ -205,8 +205,18 @@
                                             </label>
                                         </div>
                                     </div>
-
-
+                                    <div class="form-group">
+                                        <label for="" class="col-sm-2 control-label">seo优化_关键字</label>
+                                        <div class="col-sm-9">
+                                            <input type="text" class="form-control" name="seo_keyword" id="seo_keyword" value="">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="" class="col-sm-2 control-label">seo优化_描述</label>
+                                        <div class="col-sm-9">
+                                            <input type="text" class="form-control" name="seo_description" id="seo_description" value="">
+                                        </div>
+                                    </div>
                                 </div>
                                 <div role="tabpanel" class="tab-pane" id="nav_goods_description" style="padding-top: 20px" >
                                     <div class="form-group">
@@ -239,7 +249,24 @@
                                     <?php endforeach; ?>
                                 </div>
 
-                                <div role="tabpanel" class="tab-pane" id="nav_goods_attribute">ddd</div>
+                                <div role="tabpanel" class="tab-pane" id="nav_goods_attribute">
+                                    <div class="form-group">
+                                        <label for="" class="col-sm-2 control-label">商品类型：</label>
+                                        <div class="col-sm-3">
+                                            <select name="type_id" id="type_id" class="form-control">
+                                                <option value="0">选择类型</option>
+                                                <?php foreach($typeData as $k=>$v): ?>
+                                                <?php $v = (array)$v;?>
+                                                <option value="{{$v['id']}}">{{$v['type_name']}}</option>
+                                                <?php endforeach;?>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div id="attr_container">
+
+                                    </div>
+                                </div>
+
                                 <div role="tabpanel" class="tab-pane" id="nav_goods_img" style="padding-top: 20px;">
                                     <div class="form-group">
                                         <label for="" class="col-sm-2 control-label">商品相册</label>
@@ -383,6 +410,55 @@
                     }
                 }
             });
+
+            // 当选择类型时执行AJAX取出类型的属性
+            $("select[name=type_id]").change(function(){
+                var type_id = $(this).val(); // 获取选中的类型的id
+                if (type_id != "") {
+                    var to_url =  "<?php echo url('backend/goods/ajaxGetAttr'); ?>?type_id="+type_id;
+                    $.ajax({
+                        type : "GET",
+                        url : to_url,
+                        dataType : "json",
+                        success : function(ret) {
+                            var data = ret.data.attrData;
+                            console.log(data);
+                            var _html = "";
+                            // 循环服务器返回的属性的JSON数据
+                            $(data).each(function(k,v) {
+                                _html += "<div class='form-group'>";
+                                _html +=     "<label class='col-sm-2 control-label'>"+v.attr_name + " : </label>";
+                                _html +=     "<div class='col-sm-3'>";
+                                if (v.attr_type == 1) {
+                                    _html +=    " <a onclick='addnew(this);' href='javascript:void(0);'>[+]</a> ";
+                                }
+                                // 判断是否有可选值
+                                if (v.attr_option_values == "") {
+                                    _html +=     "<input type='text' class='form-control' name='ga[" + v.id + "][]' />";
+                                } else {
+                                    // 先把可选值转化成数组
+                                    var _attr = v.attr_option_values.split(",");
+                                    _html +=      "<select name='ga["+v.id+"][]' class='form-control' >";
+                                    _html +=          "<option value=''>请选择</option>";
+                                    // 循环每个可选值构造option
+                                    for (var i=0; i<_attr.length; i++) {
+                                        _html +=       "<option value='"+_attr[i]+"'>"+_attr[i]+"</option>";
+                                    }
+                                    _html +=       "</select>";
+                                }
+                                if (v.attr_type == 1){
+                                    _html +=       "属性价格(元)： <input class='form-control' name='attr_price["+v.id+"][]' type='text' />";
+                                }
+                                _html +=     "</div>";
+                                _html += "</div>";
+                            });
+                            $("#attr_container").html(_html);
+                        }
+                    });
+                } else {
+                    $("#attr_container").html("");
+                }
+            });
             $('.curSubmit').on('click',function () {
 
                 var brand_name = $('#brand_name').val();
@@ -502,6 +578,20 @@
                 });
             }
             return false;
+        }
+
+        // 点击+号
+        function addnew(a) {
+            var p = $(a).parent();  // 选中a标签所在的p标签
+            // 先获取A标签中的内容
+            if($(a).html() == "[+]") {
+                var newP = p.clone();  // 把p克隆一份
+                newP.find("a").html("[-]");  // 把克隆出来的P里面的a标签变成-号
+                p.after(newP); // 放在后面
+            }
+            else {
+                p.remove();
+            }
         }
     </script>
 @endsection

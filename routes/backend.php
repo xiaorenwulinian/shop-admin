@@ -123,6 +123,7 @@ Route::group(['prefix'=>'backend','namespace'=>'Backend'],function ($route) {
             Route::any('addUploadOne','GoodsController@addUploadOne');   // 添加时上传单个图片
             Route::any('addUploadMulti','GoodsController@addUploadMulti');   // 添加时上传多个图片
             Route::any('addDeleteImg','GoodsController@addDeleteImg');   // 添加时删除图片
+            Route::any('ajaxGetAttr','GoodsController@ajaxGetAttr');   // 获取商品属性
 
         });
 

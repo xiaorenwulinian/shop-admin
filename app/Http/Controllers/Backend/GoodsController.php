@@ -153,6 +153,19 @@ class GoodsController extends BackendBaseController
     }
 
 
+    public function ajaxGetAttr(Request $request)
+    {
+        $typeId = $request->input('type_id');
+        $attrData = DB::table('attribute')
+            ->where('is_del','=',0)
+            ->where('type_id','=',$typeId)
+            ->orderBy('id')
+            ->get();
+        $ret = [
+            'attrData' => $attrData
+        ];
+        return res_success($ret);
+    }
 
 
     /**
