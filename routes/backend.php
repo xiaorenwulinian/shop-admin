@@ -120,6 +120,9 @@ Route::group(['prefix'=>'backend','namespace'=>'Backend'],function ($route) {
             Route::post('editStore','GoodsController@editStore'); // 修改保存
             Route::any('delete','GoodsController@delete');        // 删除
             Route::any('multiDelete','GoodsController@multiDelete');   // 批量删除
+            Route::any('addUploadOne','GoodsController@addUploadOne');   // 批量删除
+            Route::any('addUploadMulti','GoodsController@addUploadMulti');   // 批量删除
+            Route::any('addDeleteImg','GoodsController@addDeleteImg');   // 批量删除
 
         });
 

@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Backend\BackendBaseController;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Intervention\Image\Facades\Image;
 
 /**
  * 商品
@@ -69,51 +70,33 @@ class GoodsController extends BackendBaseController
         return view('backend.goods.add', $ret);
     }
 
-    public function addUpload(Request $request)
+    /**
+     * 添加时单文件上传
+     * @param Request $request
+     * @return false|string
+     */
+    public function addUploadOne(Request $request)
     {
-        $file = $request->file('brand_img');
+        $file = $request->file('goods_img');
         if (empty($file) || !$file->isValid()) {
             return res_fail("请输入正确的文件格式！");
         }
-
         $originalName = $file->getClientOriginalName(); // 文件原名
         $ext = $file->getClientOriginalExtension();  // 扩展名
-        $uploadDir =  '/uploads/brand';
-//        $timeArr = explode('.',microtime(true));
-//        $uniqueFileName =  $timeArr[0] . $timeArr[1] . rand(100000,999999) . uniqid() . '.'. $ext; // oss文件名
-        $uniqueFileName =  date('YmdHis').'-'.uniqid() . '.'. $ext; // oss文件名
-        $database = $uploadDir .'/'. $uniqueFileName;
-        $path = $file->move(public_path($uploadDir),$uniqueFileName);
-        $bigImg = $uploadDir . DIRECTORY_SEPARATOR . $uniqueFileName;
+        $curDay = date('Ymd');
+        $uploadDir =  '/uploads/goods/'.$curDay;
+        $unique = date('YmdHis').'-'.uniqid();
+        $fileName =   $unique . '.'. $ext;
+        $fileThumbName =  $unique . '_thumb.'. $ext;
+        $file->move(public_path($uploadDir),$fileName);
+        $bigImg = $uploadDir . '/' . $fileName; //原图
+        $thumbImg = $uploadDir . '/' . $fileThumbName; //缩略图
+        Image::make(public_path($bigImg))->resize(200,200)->save(public_path($thumbImg));
         $ret = [
             'logo_file_path' => $bigImg,
+            'logo_file_path_thumb' => $thumbImg,
         ];
-
         return res_success($ret);
-
-
-        // 获取表单上传文件 例如上传了001.jpg
-        $file = $request->file('brand_img');
-        $upload_second_dir = 'brand'; //上传的二级目录
-        // 移动到框架应用根目录/uploads/ 目录下
-        $info = $file->validate(['size'=>10000000])->move( "./uploads/{$upload_second_dir}/");
-        if($info){
-
-            //生成的文件路径
-            $old_big_img = $big_file_path = str_replace('\\','/',$info->getSaveName());
-            $thumb_img = str_replace($info->getFilename(),'thumb_'.$info->getFilename(),$old_big_img);
-            $thumb_img_path = "./uploads/{$upload_second_dir}/".$thumb_img;
-//            $image = \think\Image::open('./uploads/advertise/'.$big_file_path);
-            $image = \think\Image::open(request()->file('ad_img'));
-            $image->thumb(200, 200)->save($thumb_img_path);
-            return  json([
-                'code'=>0,
-                'logo_file_path'=> $upload_second_dir.'/'.$big_file_path,
-                'logo_file_path_thumb'=> $upload_second_dir.'/'.$thumb_img
-            ]);
-        }else{
-            return  json(['code'=>1, 'msg'=> $file->getError()]);
-        }
     }
 
     /**
@@ -124,13 +107,19 @@ class GoodsController extends BackendBaseController
     public function addDeleteImg(Request $request)
     {
         $cur_logo_path = $request->input('cur_logo_path');
-        if($cur_logo_path) {
+        $cur_logo_path_thumb = $request->input('cur_logo_path_thumb');
+        if($cur_logo_path && $cur_logo_path_thumb) {
             $cur_logo_path_all =  public_path($cur_logo_path);
             if(file_exists($cur_logo_path_all)) {
                 unlink($cur_logo_path_all);
             }
+            $cur_logo_path_thumb_all =  public_path($cur_logo_path_thumb);
+            if(file_exists($cur_logo_path_thumb_all)) {
+                unlink($cur_logo_path_thumb_all);
+            }
             return  res_success();
         }
+        return res_fail('no image ');
     }
 
 

@@ -98,6 +98,16 @@
                                         </div>
                                     </div>
 
+                                    <div class="form-group">
+                                        <label for="" class="col-sm-2 control-label">商品图片</label>
+                                        <div class="col-sm-5" >
+                                            <button type="button" class="btn btn-primary upload_logo_button "> 上传图片 </button>
+                                            <div class="img_show_content" style="margin-top: 10px;">
+
+                                            </div>
+                                            <input id="goods_img" name="goods_img" class="goods_img" type="file" style="display: none">
+                                        </div>
+                                    </div>
 
 
                                     <div class="form-group">
@@ -150,6 +160,52 @@
                                         </div>
                                     </div>
 
+                                    <div class="form-group">
+                                        <label for="" class="col-sm-2 control-label">是否新品</label>
+                                        <div class="col-sm-3">
+                                            <label class="radio-inline">
+                                                <input type="radio" name="is_new" class=" is_new" value="0" checked  > 否
+                                            </label>
+                                            <label class="radio-inline">
+                                                <input type="radio" name="is_new" class=" is_new" value="1" > 是
+                                            </label>
+                                        </div>
+
+                                        <label for="" class="col-sm-2 control-label">是否热卖</label>
+                                        <div class="col-sm-3">
+                                            <label class="radio-inline">
+                                                <input type="radio" name="is_hot" class="is_hot" value="0" checked  > 否
+                                            </label>
+                                            <label class="radio-inline">
+                                                <input type="radio" name="is_hot" class=" is_hot" value="1" > 是
+                                            </label>
+                                        </div>
+                                    </div>
+
+
+
+                                    <div class="form-group">
+                                        <label for="" class="col-sm-2 control-label">是否商户推荐</label>
+                                        <div class="col-sm-3">
+                                            <label class="radio-inline">
+                                                <input type="radio" name="is_best" class=" is_best" value="0" checked  > 否
+                                            </label>
+                                            <label class="radio-inline">
+                                                <input type="radio" name="is_best" class=" is_best" value="1" > 是
+                                            </label>
+                                        </div>
+
+                                        <label for="" class="col-sm-2 control-label">是否上架</label>
+                                        <div class="col-sm-3">
+                                            <label class="radio-inline">
+                                                <input type="radio" name="is_on_sale" class=" is_on_sale" value="0" checked  > 否
+                                            </label>
+                                            <label class="radio-inline">
+                                                <input type="radio" name="is_on_sale" class=" is_on_sale" value="1" > 是
+                                            </label>
+                                        </div>
+                                    </div>
+
 
                                 </div>
                                 <div role="tabpanel" class="tab-pane" id="nav_goods_description">bb</div>
@@ -167,6 +223,7 @@
                         </div>
                     </form>
                 </div>
+                <div style="margin-bottom: 200px;"></div>
             </div>
         </div>
     </div>
@@ -187,7 +244,10 @@
     <script src="/static/backend/jquery-file-upload-9.28.0/js/jquery.iframe-transport.js" type="text/javascript"></script>
 
     <script>
-        logo_path = '';
+        var logo_path = '';
+        var logo_thumb_path = '';
+        var photo_multi_path = [];
+        var photo_multi_thumb_path = [];
         function change_promote_type(_this) {
             if ($(_this).is(':checked') ) {
                 $('.promote_price').removeAttr('disabled');
@@ -196,6 +256,7 @@
             }
         }
         $(function () {
+
             $("#promote_start_time").datetimepicker({
                 format: 'yyyy-mm-dd',
                 // format: 'yyyy-mm-dd hh:ii:ss', 年月日时分秒，搜索不需要时分秒
@@ -217,22 +278,23 @@
 
             //单文件上传
             $('.upload_logo_button').on('click',function(){
-                $('#brand_img').click();
+                $('#goods_img').click();
             });
-            $('#brand_img').fileupload({
+            $('#goods_img').fileupload({
                 autoUpload: true,//是否自动上传
-                url: "{{ url('backend/brand/addUpload')}}",
+                url: "{{ url('backend/goods/addUploadOne')}}",
                 dataType: 'json',
                 done: function (e, data) {
                     console.log(data);
                     var _result = data.result;
+                    console.log(_result);
                     if(_result.code == 200) {
                         var _data = _result.data;
                         logo_path = _data.logo_file_path;
-
+                        logo_thumb_path = _data.logo_file_path_thumb;
                         var _html ="";
                         _html +="<div>";
-                        _html +="<a src='javascript:void(0);'data-path='"+_data.logo_file_path+"' data-path-thumb='"+_data.logo_file_path+"' onclick='delete_logo_img(this);'  >删除</a><br>";
+                        _html +="<a src='javascript:void(0);'data-path='"+_data.logo_file_path+"' data-path-thumb='"+_data.logo_file_path_thumb+"' onclick='delete_logo_img(this);'  >删除</a><br>";
                         _html +="<img class='thumb_img' src='"+_data.logo_file_path+"'/>";
                         _html +="</div>";
 
@@ -296,7 +358,8 @@
         //删除单 图片
         function delete_logo_img(cur_this){
             var cur_logo_path = $(cur_this).attr('data-path');
-            var url = "<?php echo url('backend/brand/addDeleteImg','',false);?>";
+            var cur_logo_path_thumb = $(cur_this).attr('data-path-thumb');
+            var url = "<?php echo url('backend/goods/addDeleteImg');?>";
             var _this = cur_this;
             if(confirm('确定要删除吗?')) {
                 $.ajax({
@@ -305,21 +368,18 @@
                     dataType: 'json',
                     data: {
                         cur_logo_path : cur_logo_path,
+                        cur_logo_path_thumb : cur_logo_path_thumb,
                     },
                     success: function(ret){
                         console.log(ret);
                         if(ret.code == 200) {
                             $(_this).parent().remove();
                             logo_path = '';
+                            logo_thumb_path = '';
                         } else {
                             alert(ret.msg);
                             return false;
                         }
-                    },
-                    error: function (XMLHttpRequest, textStatus, errorThrown) {
-                        layer.msg(XMLHttpRequest.responseJSON.msg, {icon: 5,time:1000,});
-                        return false;
-
                     }
                 });
             }
