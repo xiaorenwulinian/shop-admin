@@ -208,10 +208,50 @@
 
 
                                 </div>
-                                <div role="tabpanel" class="tab-pane" id="nav_goods_description">bb</div>
-                                <div role="tabpanel" class="tab-pane" id="nav_member_price">cc</div>
+                                <div role="tabpanel" class="tab-pane" id="nav_goods_description" style="padding-top: 20px" >
+                                    <div class="form-group">
+                                        <label for="" class="col-sm-2 control-label">商品描述</label>
+
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-offset-1 col-sm-10">
+                                            <textarea id="goods_desc" class="goods_desc" name="goods_desc"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div role="tabpanel" class="tab-pane" id="nav_member_price">
+                                    <div class="form-group" style="text-align: center;color: black;font-weight: 700">
+                                        <h4 >
+                                            会员价格（如果没有填会员价格就按折扣率计算价格，如果填了就按填的价格算，不再打折）
+                                        </h4>
+                                    </div>
+                                    <?php foreach ($memberLevelData as $k => $v): ?>
+                                        <?php  $v = (array)$v; ?>
+                                        <div class="form-group">
+                                            <label for="" class="col-sm-3 control-label">
+                                                {{$v['level_name']}}（<?php echo $v['rate']/10; ?> 折） ：
+                                            </label>
+                                            <div class="col-sm-7">
+                                                ￥<input type="text" size="10" data-level-id="{{$v['id']}}"  name="mp[{{$v['id']}}]" /> 元
+                                            </div>
+                                        </div>
+                                    <?php endforeach; ?>
+                                </div>
+
                                 <div role="tabpanel" class="tab-pane" id="nav_goods_attribute">ddd</div>
-                                <div role="tabpanel" class="tab-pane" id="nav_goods_img">eee</div>
+                                <div role="tabpanel" class="tab-pane" id="nav_goods_img" style="padding-top: 20px;">
+                                    <div class="form-group">
+                                        <label for="" class="col-sm-2 control-label">商品相册</label>
+                                        <div class="col-sm-5" >
+                                            <button type="button" class="btn btn-primary upload_photo_button_multi "> 上传相册 </button>
+                                            <div class="photo_multi_show_content" style="margin-top: 10px;">
+
+                                            </div>
+                                            <input id="photo_multi" name="photo_multi" class="photo_multi" type="file" style="display: none">
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
                         </div>
@@ -243,11 +283,23 @@
     <script src="/static/backend/jquery-file-upload-9.28.0/js/jquery.fileupload.js" type="text/javascript"></script>
     <script src="/static/backend/jquery-file-upload-9.28.0/js/jquery.iframe-transport.js" type="text/javascript"></script>
 
+
+    <script src="/static/backend/ueditor/ueditor.config.js" type="text/javascript" ></script>
+    <script src="/static/backend/ueditor/ueditor.all.min.js" type="text/javascript" ></script>
+    <!--建议手动加在语言，避免在ie下有时因为加载语言失败导致编辑器加载失败-->
+    <!--这里加载的语言文件会覆盖你在配置项目里添加的语言类型，比如你在配置项目里配置的是英文，这里加载的中文，那最后就是中文-->
+    <script src="/static/backend/ueditor/lang/zh-cn/zh-cn.js" type="text/javascript" ></script>
+
     <script>
         var logo_path = '';
         var logo_thumb_path = '';
         var photo_multi_path = [];
         var photo_multi_thumb_path = [];
+
+        /**
+         * 切换是否促销
+         * @param _this
+         */
         function change_promote_type(_this) {
             if ($(_this).is(':checked') ) {
                 $('.promote_price').removeAttr('disabled');
@@ -256,6 +308,12 @@
             }
         }
         $(function () {
+
+            var cur_ue = UE.getEditor('goods_desc', {
+                "initialFrameWidth" : "100%",   // 宽
+                "initialFrameHeight" : 600,      // 高
+                "maximumWords" : 10000            // 最大可以输入的字符数量
+            });
 
             $("#promote_start_time").datetimepicker({
                 format: 'yyyy-mm-dd',
@@ -288,7 +346,7 @@
                     console.log(data);
                     var _result = data.result;
                     console.log(_result);
-                    if(_result.code == 200) {
+                    if (_result.code == 200) {
                         var _data = _result.data;
                         logo_path = _data.logo_file_path;
                         logo_thumb_path = _data.logo_file_path_thumb;
@@ -297,8 +355,31 @@
                         _html +="<a src='javascript:void(0);'data-path='"+_data.logo_file_path+"' data-path-thumb='"+_data.logo_file_path_thumb+"' onclick='delete_logo_img(this);'  >删除</a><br>";
                         _html +="<img class='thumb_img' src='"+_data.logo_file_path+"'/>";
                         _html +="</div>";
-
                         $('.img_show_content').html(_html);
+                    }
+                }
+            });
+            //商品相册，多文件
+            $('.upload_photo_button_multi').on('click',function(){
+                $('#photo_multi').click();
+            });
+            $('#photo_multi').fileupload({
+                autoUpload: true,//是否自动上传
+                url: "{{ url('backend/goods/addUploadMulti')}}",
+                dataType: 'json',
+                done: function (e, data) {
+                    var _result = data.result;
+                    console.log(_result);
+                    if (_result.code == 200) {
+                        var _data = _result.data;
+                        photo_multi_path.push(_data.logo_file_path);
+                        photo_multi_thumb_path.push(_data.logo_file_path_thumb);
+                        var _html ="";
+                        _html +="<div style='margin-top: 15px;'>";
+                        _html +="<a src='javascript:void(0);'data-path='"+_data.logo_file_path+"' data-path-thumb='"+_data.logo_file_path_thumb+"' onclick='delete_photo_multi(this);'  >删除</a><br>";
+                        _html +="<img class='thumb_img' src='"+_data.logo_file_path+"'/>";
+                        _html +="</div>";
+                        $('.photo_multi_show_content').append(_html);
                     }
                 }
             });
@@ -376,6 +457,43 @@
                             $(_this).parent().remove();
                             logo_path = '';
                             logo_thumb_path = '';
+                        } else {
+                            alert(ret.msg);
+                            return false;
+                        }
+                    }
+                });
+            }
+            return false;
+        }
+
+        //删除相册
+        function delete_photo_multi(cur_this){
+            var cur_logo_path = $(cur_this).attr('data-path');
+            var cur_logo_path_thumb = $(cur_this).attr('data-path-thumb');
+            var url = "<?php echo url('backend/goods/addDeleteImg');?>";
+            var _this = cur_this;
+            if(confirm('确定要删除吗?')) {
+                $.ajax({
+                    type: 'get',
+                    url:  url,
+                    dataType: 'json',
+                    data: {
+                        cur_logo_path : cur_logo_path,
+                        cur_logo_path_thumb : cur_logo_path_thumb,
+                    },
+                    success: function(ret){
+                        console.log(ret);
+                        if(ret.code == 200) {
+                            $(_this).parent().remove();
+                            var photo_big = $.inArray(cur_logo_path,photo_multi_path);
+                            if(photo_big > -1) {
+                                photo_multi_path.splice(photo_big,1);
+                            }
+                            var photo_small = $.inArray(cur_logo_path_thumb,photo_multi_thumb_path);
+                            if(photo_small > -1) {
+                                photo_multi_thumb_path.splice(photo_small,1);
+                            }
                         } else {
                             alert(ret.msg);
                             return false;

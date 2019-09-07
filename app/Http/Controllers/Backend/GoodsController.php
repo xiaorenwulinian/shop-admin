@@ -93,7 +93,37 @@ class GoodsController extends BackendBaseController
         $thumbImg = $uploadDir . '/' . $fileThumbName; //缩略图
         Image::make(public_path($bigImg))->resize(200,200)->save(public_path($thumbImg));
         $ret = [
-            'logo_file_path' => $bigImg,
+            'logo_file_path'       => $bigImg,
+            'logo_file_path_thumb' => $thumbImg,
+        ];
+        return res_success($ret);
+    }
+
+    /**
+     * 添加时上传相册集
+     * @param Request $request
+     * @return false|string
+     */
+    public function addUploadMulti(Request $request)
+    {
+
+        $file = $request->file('photo_multi');
+        if (empty($file) || !$file->isValid()) {
+            return res_fail("请输入正确的文件格式！");
+        }
+        $originalName = $file->getClientOriginalName(); // 文件原名
+        $ext = $file->getClientOriginalExtension();  // 扩展名
+        $curDay = date('Ymd');
+        $uploadDir =  '/uploads/goodsAlbum/'.$curDay;
+        $unique = date('YmdHis').'-'.uniqid();
+        $fileName =   $unique . '.'. $ext;
+        $fileThumbName =  $unique . '_thumb.'. $ext;
+        $file->move(public_path($uploadDir),$fileName);
+        $bigImg = $uploadDir . '/' . $fileName; //原图
+        $thumbImg = $uploadDir . '/' . $fileThumbName; //缩略图
+        Image::make(public_path($bigImg))->resize(200,200)->save(public_path($thumbImg));
+        $ret = [
+            'logo_file_path'       => $bigImg,
             'logo_file_path_thumb' => $thumbImg,
         ];
         return res_success($ret);
