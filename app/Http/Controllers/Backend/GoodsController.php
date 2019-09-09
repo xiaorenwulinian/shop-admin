@@ -8,6 +8,7 @@ use App\Common\Logic\BrandLogic;
 use App\Common\Logic\GoodsLogic;
 use App\Http\Requests\ArticleEditStoresRequest;
 use App\Model\Brand;
+use function GuzzleHttp\Psr7\parse_query;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Backend\BackendBaseController;
 use Illuminate\Support\Facades\DB;
@@ -177,13 +178,28 @@ class GoodsController extends BackendBaseController
     public function addStore(Request $request)
     {
         $this->validate($request, [
-            'goods_name'      => 'required|max:255',
+//            'goods_name'      => 'required|max:255',
         ],[
             'goods_name.required'     => '分类必传',
             'goods_name.max'        => '标题应小于255个字！',
         ]);
         $data = $request->input();
+        $form_param = $request->input('form_param');
+        $form_data = parse_query($form_param);
+        $goods_name = $form_data['goods_name'];
+        $category_id = $form_data['category_id'];
+        $ext_cat_id = $form_data['ext_cat_id[]'] ?? '';
+        $brand_id = $form_data['brand_id'];
+        $market_price = $form_data['market_price'];
+        $shop_price = $form_data['shop_price'];
+        $jifen = $form_data['jifen'];
+        $jyz = $form_data['jyz'];
+        $jifen_price = $form_data['jifen_price'];
+        $is_promote = $form_data['is_promote'];
 
+        $goods_attribute_arr = $request->input('goods_attribute_arr');
+        $attribute_price_arr = $request->input('attribute_price_arr');
+        return res_fail();
         return res_success();
     }
 

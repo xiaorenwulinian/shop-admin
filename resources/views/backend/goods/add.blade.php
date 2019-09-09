@@ -138,9 +138,17 @@
                                     </div>
 
                                     <div class="form-group">
-                                        <label for="" class="col-sm-2 control-label">
-                                            <input value="1" name="is_promote" onclick="change_promote_type(this)"  type="checkbox" />促销价：
-                                        </label>
+
+                                        <label for="" class="col-sm-2 control-label">是否促销</label>
+                                        <div class="col-sm-3">
+                                            <label class="radio-inline">
+                                                <input type="radio" name="is_promote" class="is_promote" value="0" checked  onclick="change_promote_type(this)"  > 否
+                                            </label>
+                                            <label class="radio-inline">
+                                                <input type="radio" name="is_promote" class=" is_promote" value="1" onclick="change_promote_type(this)" > 是
+                                            </label>
+                                        </div>
+                                        <label for="" class="col-sm-2 control-label">促销价：</label>
                                         <div class="col-sm-3">
                                             <input type="text" class="form-control promote_price" disabled="disabled" name="promote_price" id="promote_price" value="0">
                                         </div>
@@ -320,7 +328,7 @@
          * @param _this
          */
         function change_promote_type(_this) {
-            if ($(_this).is(':checked') ) {
+            if ($(_this).val() == 1 ) {
                 $('.promote_price').removeAttr('disabled');
             } else {
                 $('.promote_price').attr('disabled', 'disabled');
@@ -426,11 +434,11 @@
                                 }
                                 // 判断是否有可选值
                                 if (v.attr_option_values == "") {
-                                    _html +=     "<input type='text' class='form-control' name='ga[" + v.id + "][]' />";
+                                    _html +=     "<input type='text' class='form-control'  data-attr-type-value='0'  data-attr-id='"+v.id+"'    name='ga[" + v.id + "][]' />";
                                 } else {
                                     // 先把可选值转化成数组
                                     var _attr = v.attr_option_values.split(",");
-                                    _html +=      "<select name='ga["+v.id+"][]' class='form-control' >";
+                                    _html +=      "<select name='ga["+v.id+"][]' class='form-control' data-attr-type-value='1' data-attr-id='"+v.id+"' >";
                                     _html +=          "<option value=''>请选择</option>";
                                     // 循环每个可选值构造option
                                     for (var i=0; i<_attr.length; i++) {
@@ -439,7 +447,7 @@
                                     _html +=       "</select>";
                                 }
                                 if (v.attr_type == 1){
-                                    _html +=       "属性价格(元)： <input class='form-control' name='attr_price["+v.id+"][]' type='text' />";
+                                    _html +=       "属性价格(元)： <input class='form-control' data-attr-id='"+v.id+"'  name='attr_price["+v.id+"][]' type='text' value='' />";
                                 }
                                 _html +=     "</div>";
                                 _html += "</div>";
@@ -453,7 +461,7 @@
             });
             $('.curSubmit').on('click',function () {
 
-                var goods_name = $('.goods_name').val();
+                var goods_name = $('#goods_name').val();
                 if(goods_name == '') {
                     alert('请输入商品名称');
                     return false;
@@ -462,19 +470,19 @@
                     alert('请上传图片！');
                     return false;
                 }
-                var market_price = $('.market_price').val();
+                var market_price = $('#market_price').val();
                 if(market_price == '') {
                     alert('请输入商品市场价');
                     return false;
                 }
-                var shop_price = $('.shop_price').val();
+                var shop_price = $('#shop_price').val();
                 if(shop_price == '') {
                     alert('请输入商品本店价');
                     return false;
                 }
-                var jifen = $('.jifen').val();
-                var jyz = $('.jyz').val();
-                var jifen_price = $('.jifen_price').val(); //积分兑换价
+                var jifen = $('#jifen').val();
+                var jyz = $('#jyz').val();
+                var jifen_price = $('#jifen_price').val(); //积分兑换价
                 var is_promote = $('.is_promote:checked').val();
                 console.log('==is_promote=='+is_promote);
                 if (is_promote == 1) {
@@ -502,9 +510,42 @@
                         _member_price[$(this).attr('data-level-id')] = $(this).val();
                     }
                 });
-//            alert(_member_price);
-                console.log('===memmber_price===',_member_price);
 
+                var goods_attribute_arr = {};
+                $("[name ^='ga']").each(function (index,el) {
+                    var attr_id = $(this). attr('data-attr-id');
+                    var attr_type_value = $(this). attr('data-attr-type-value');
+                    if (attr_type_value == 0 )  {
+                        // 输入框
+                        var cur_val = $(this).val();
+                    } else {
+                        // 下拉框
+                        var cur_val = $(this).find('option:selected').val();
+                    }
+                    console.log('===attr_id_value===',cur_val);
+                    if (!goods_attribute_arr.hasOwnProperty(attr_id)) {
+                        goods_attribute_arr[attr_id] = [];
+                    }
+                    if (cur_val != '' && cur_val != null && cur_val) {
+                        goods_attribute_arr[attr_id].push(cur_val);
+                    }
+                });
+                console.log('===goods_attribute===',goods_attribute_arr);
+
+                var attribute_price_arr = {};
+                $("input[name ^='attr_price']").each(function (index,el) {
+                    var attr_id = $(this). attr('data-attr-id');
+                    var cur_val = $(this).val();
+                    console.log('===attr_id_value===',cur_val);
+                    if (!attribute_price_arr.hasOwnProperty(attr_id)) {
+                        attribute_price_arr[attr_id] = [];
+                    }
+                    if (cur_val != '' && cur_val != null && cur_val) {
+                        attribute_price_arr[attr_id].push(cur_val);
+                    }
+                });
+                console.log('===attribute_price_arr===',attribute_price_arr);
+                
               //  category_id   ext_cat_id goods_img  market_price shop_price jifen_price is_promote promote_price
 //       promote_start_time promote_end_time is_new is_hot is_best is_on_sale seo_keyword seo_description
 //   goods_desc mp['id'] type_id photo_multi
@@ -548,10 +589,9 @@
                         photo_big : new_photo_big,
                         photo_thumb : new_photo_thumb,
                         form_param : form_param,
-
+                        goods_attribute_arr : goods_attribute_arr,
+                        attribute_price_arr : attribute_price_arr,
                     },
-                // 商品描述
-                var goods_desc = cur_ue.getContent();
                     headers:{
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                     },
@@ -563,7 +603,7 @@
                                 icon: 6,
                                 end:function () {
     //                               location.reload();
-                                    location.href = "<?php echo url('backend/brand/lst');?>";
+                                    location.href = "<?php echo url('backend/goods/lst');?>";
                                 }
                             })
                         } else {
