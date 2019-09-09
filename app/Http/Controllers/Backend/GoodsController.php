@@ -177,15 +177,13 @@ class GoodsController extends BackendBaseController
     public function addStore(Request $request)
     {
         $this->validate($request, [
-            'brand_name'      => 'required|max:255',
-            'site_url'      => 'required|max:255',
-            'brand_img'      => 'required|max:255',
+            'goods_name'      => 'required|max:255',
         ],[
-            'brand_name.required'     => '分类必传',
-            'brand_name.max'        => '标题应小于255个字！',
+            'goods_name.required'     => '分类必传',
+            'goods_name.max'        => '标题应小于255个字！',
         ]);
         $data = $request->input();
-        Brand::create($data);
+
         return res_success();
     }
 

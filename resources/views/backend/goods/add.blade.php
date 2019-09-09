@@ -79,7 +79,6 @@
                                                 <?php endforeach;?>
                                             </select>
                                         </div>
-
                                     </div>
                                     <div class="form-group">
                                         <label for="" class="col-sm-2 control-label">扩展分类：</label>
@@ -109,7 +108,6 @@
                                         </div>
                                     </div>
 
-
                                     <div class="form-group">
                                         <label for="market_price" class="col-sm-2 control-label">市场价(元)：</label>
                                         <div class="col-sm-3">
@@ -132,7 +130,6 @@
                                             <input type="text" class="form-control" name="jyz" id="jyz" value="0">
                                         </div>
                                     </div>
-
                                     <div class="form-group">
                                         <label for="jifen_price" class="col-sm-2 control-label">积分兑换，需要的积分数:（不填代表不能使用积分兑换）</label>
                                         <div class="col-sm-3">
@@ -181,9 +178,6 @@
                                             </label>
                                         </div>
                                     </div>
-
-
-
                                     <div class="form-group">
                                         <label for="" class="col-sm-2 control-label">是否商户推荐</label>
                                         <div class="col-sm-3">
@@ -221,7 +215,6 @@
                                 <div role="tabpanel" class="tab-pane" id="nav_goods_description" style="padding-top: 20px" >
                                     <div class="form-group">
                                         <label for="" class="col-sm-2 control-label">商品描述</label>
-
                                     </div>
                                     <div class="form-group">
                                         <div class="col-sm-offset-1 col-sm-10">
@@ -266,7 +259,6 @@
 
                                     </div>
                                 </div>
-
                                 <div role="tabpanel" class="tab-pane" id="nav_goods_img" style="padding-top: 20px;">
                                     <div class="form-group">
                                         <label for="" class="col-sm-2 control-label">商品相册</label>
@@ -461,32 +453,105 @@
             });
             $('.curSubmit').on('click',function () {
 
-                var brand_name = $('#brand_name').val();
-                if (brand_name == '' || brand_name.length == 0) {
-                    layer.msg("请输入品牌名称!", {icon: 5,time:2000});
+                var goods_name = $('.goods_name').val();
+                if(goods_name == '') {
+                    alert('请输入商品名称');
                     return false;
                 }
-                var site_url = $('#site_url').val();
-                if (site_url == '' || site_url.length == 0) {
-                    layer.msg("请输入网站地址!", {icon: 5,time:2000});
+                if (logo_path == '' || logo_thumb_path == '') {
+                    alert('请上传图片！');
                     return false;
                 }
-                if (logo_path == '' || brand_name.length == 0) {
-                    layer.msg("请上传品牌图片!", {icon: 5,time:2000});
+                var market_price = $('.market_price').val();
+                if(market_price == '') {
+                    alert('请输入商品市场价');
                     return false;
                 }
+                var shop_price = $('.shop_price').val();
+                if(shop_price == '') {
+                    alert('请输入商品本店价');
+                    return false;
+                }
+                var jifen = $('.jifen').val();
+                var jyz = $('.jyz').val();
+                var jifen_price = $('.jifen_price').val(); //积分兑换价
+                var is_promote = $('.is_promote:checked').val();
+                console.log('==is_promote=='+is_promote);
+                if (is_promote == 1) {
+                    var promote_price = $('.promote_price').val();
+                    var promote_start_time = $('.promote_start_time').val();
+                    var promote_end_time = $('.promote_end_time').val();
+                    if(promote_price == '' || promote_start_time == '' || promote_end_time == '') {
+                        alert('请输入促销价，或促销开始和结束时间');
+                        return false;
+                    }
+                }
+                var is_hot = $('.is_hot:checked').val();
+                var is_new = $('.is_new:checked').val();
+                var is_best = $('.is_best:checked').val();
+                var is_on_sale = $('.is_on_sale:checked').val();
+                var seo_keyword = $('.seo_keyword').val();
+                var seo_description = $('.seo_description').val();
+                // 商品描述
+                var goods_desc = cur_ue.getContent();
+                // 会员价
+                var _member_price = {};
+                $("input[name ^='mp']").each(function (index,el) {
+                    if($(this).val() != '' && $(this).val() != 0) {
+//                    _member_price.push($(this).attr('data-level-id') +':'+$(this).val());
+                        _member_price[$(this).attr('data-level-id')] = $(this).val();
+                    }
+                });
+//            alert(_member_price);
+                console.log('===memmber_price===',_member_price);
 
-                var url = "<?php echo url('backend/brand/addStore');?>";
-    //            var form_param = $('#formSubmit').serialize();
+              //  category_id   ext_cat_id goods_img  market_price shop_price jifen_price is_promote promote_price
+//       promote_start_time promote_end_time is_new is_hot is_best is_on_sale seo_keyword seo_description
+//   goods_desc mp['id'] type_id photo_multi
+
+                //商品相册,原图和缩略图
+                console.log(photo_multi_path);
+                console.log(photo_multi_thumb_path);
+                var new_photo_big = '';
+                var new_photo_thumb = '';
+                if(photo_multi_path.length >0) {
+                    new_photo_big =  photo_multi_path.join(',');
+                }
+                if(photo_multi_thumb_path.length >0) {
+                    new_photo_thumb =  photo_multi_thumb_path.join(',');
+                }
+                console.log(new_photo_big);
+                console.log(new_photo_thumb);
+                var url = "<?php echo url('backend/goods/addStore');?>";
+               var form_param = $('#formSubmit').serialize();
                 $.ajax({
                     type: 'post',
                     url:  url,
                     dataType: 'json',
                     data: {
-                        brand_name : brand_name,
-                        site_url : site_url,
-                        brand_img : logo_path,
+                        goods_name : goods_name,
+                        goods_img : logo_path,
+                        goods_thumb_img : logo_thumb_path,
+                        market_price : market_price,
+                        shop_price : shop_price,
+                        jifen : jifen,
+                        jifen_price : jifen_price,
+                        jyz : jyz,
+                        is_hot : is_hot,
+                        is_new : is_new,
+                        is_best : is_best,
+                        is_on_sale : is_on_sale,
+                        seo_keyword : seo_keyword,
+                        seo_description : seo_description,
+                        goods_desc : goods_desc,
+                        member_price : _member_price,
+                        photo_big : new_photo_big,
+                        photo_thumb : new_photo_thumb,
+                        form_param : form_param,
+
                     },
+                // 商品描述
+                var goods_desc = cur_ue.getContent();
                     headers:{
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                     },
