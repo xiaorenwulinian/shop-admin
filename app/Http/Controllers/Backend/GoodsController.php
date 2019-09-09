@@ -177,28 +177,163 @@ class GoodsController extends BackendBaseController
      */
     public function addStore(Request $request)
     {
+        /*
         $this->validate($request, [
-//            'goods_name'      => 'required|max:255',
+            'goods_name'      => 'required|max:255',
+            'category_id'      => 'required|integer',
+            'brand_id'      => 'required|integer',
+            'type_id'      => 'required|integer',
+            'goods_img'      => 'required',
+            'goods_thumb_img'      => 'required',
+            'market_price'      => 'required',
+            'shop_price'      => 'required',
+            'goods_name'      => 'required|max:255',
         ],[
             'goods_name.required'     => '分类必传',
             'goods_name.max'        => '标题应小于255个字！',
         ]);
-        $data = $request->input();
+        */
+        $req_data = $request->input();
         $form_param = $request->input('form_param');
         $form_data = parse_query($form_param);
-        $goods_name = $form_data['goods_name'];
-        $category_id = $form_data['category_id'];
-        $ext_cat_id = $form_data['ext_cat_id[]'] ?? '';
-        $brand_id = $form_data['brand_id'];
-        $market_price = $form_data['market_price'];
-        $shop_price = $form_data['shop_price'];
-        $jifen = $form_data['jifen'];
-        $jyz = $form_data['jyz'];
-        $jifen_price = $form_data['jifen_price'];
-        $is_promote = $form_data['is_promote'];
+        $goods_name          = $req_data['goods_name'];
+        $brand_id            = $req_data['brand_id'];
+        $category_id         = $req_data['category_id'];
+        $ext_cat_id          = $req_data['ext_cat_id'] ?? '';
+        $goods_img           = $req_data['goods_img'];
+        $goods_thumb_img     = $req_data['goods_thumb_img'];
+        $market_price        = $req_data['market_price'];
+        $shop_price          = $req_data['shop_price'];
+        $jifen               = $req_data['jifen'];
+        $jifen_price         = $req_data['jifen_price'];
+        $jyz                 = $req_data['jyz'];
+        $is_hot              = $req_data['is_hot'];
+        $is_promote          = $req_data['is_promote'];
+        $promote_price       = $req_data['promote_price'];
+        $promote_start_time  = $req_data['promote_start_time'];
+        $promote_end_time    = $req_data['promote_end_time'];
+        $is_new              = $req_data['is_new'];
+        $is_best             = $req_data['is_best'];
+        $is_on_sale          = $req_data['is_on_sale'];
+        $seo_keyword         = $req_data['seo_keyword'] ?? '';
+        $seo_description     = $req_data['seo_description'] ?? '';
+        $type_id             = $req_data['type_id'];
+        $goods_desc          = $req_data['goods_desc'] ?? '';
 
-        $goods_attribute_arr = $request->input('goods_attribute_arr');
-        $attribute_price_arr = $request->input('attribute_price_arr');
+
+        $insert_arr = [
+            'goods_name'      => $goods_name,
+            'goods_number'    => uniqid(),
+            'category_id'     => $category_id,
+            'brand_id'        => $brand_id,
+            'goods_img'       => $goods_img,
+            'goods_thumb_img' => $goods_thumb_img,
+            'market_price'    => $market_price,
+            'shop_price'      => $shop_price,
+            'jifen'           => $jifen,
+            'jyz'             => $jyz,
+            'jifen_price'     => $jifen_price,
+            'is_promote'      => $is_promote,
+            'is_hot'          => $is_hot,
+            'is_new'          => $is_new,
+            'is_best'         => $is_best,
+            'is_on_sale'      => $is_on_sale,
+            'seo_keyword'     => $seo_keyword,
+            'seo_description' => $seo_description,
+            'type_id'         => $type_id,
+            'goods_desc'      => $goods_desc,
+            'addtime'         => time(),
+
+        ];
+
+        if ($is_promote == 1) {
+            $insert_arr['promote_price']      = $promote_price;
+            $insert_arr['promote_start_time'] = $promote_start_time;
+            $insert_arr['promote_end_time']   = $promote_end_time;
+        }
+        DB::beginTransaction();
+        try {
+            $new_goods_id = DB::table('goods')->insertGetId($insert_arr);
+            //会员价
+            $member_price = $req_data['member_price'] ?? [];
+            if (!empty($market_price)) {
+                $mp_insert_arr = [];
+                foreach ($member_price as $k => $v) {
+                    $temp = [
+                        'goods_id' => $new_goods_id,
+                        'level_id' => $k,
+                        'price'    => $v,
+                    ];
+                    array_push($mp_insert_arr,$temp);
+                }
+                DB::table('member_price')->insert($mp_insert_arr);
+            }
+            // 商品拓展分类
+            $ext_cat_id_arr = [];
+            if (!empty($ext_cat_id)) {
+                $ext_cat_id_arr = explode(',',$ext_cat_id);
+            }
+            if (!empty($ext_cat_id_arr)) {
+                $ext_cat_insert_arr = [];
+                foreach ($ext_cat_id_arr as $k => $v) {
+                    $temp = [
+                        'goods_id'            => $new_goods_id,
+                        'category_id'         => $v,
+                    ];
+                    array_push($ext_cat_insert_arr,$temp);
+                }
+                DB::table('goods_ext_category')->insert($ext_cat_insert_arr);
+            }
+            // 商品属性
+            $goods_attribute_arr = $request->input('goods_attribute_arr'); // 属性类型
+            $attribute_price_arr = $request->input('attribute_price_arr'); // 属性价格
+            if (!empty($goods_attribute_arr)) {
+                $goods_attr_insert_arr = [];
+                foreach ($goods_attribute_arr as $attr_id => $attr_value) {
+                    foreach ($attr_value as $k1 => $v1) {
+                        if (empty($v)) {
+                            continue;
+                        }
+                        $price = isset($attribute_price_arr[$attr_id][$k1]) ? $attribute_price_arr[$attr_id][$k1] : 0;
+                        $temp = [
+                            'goods_id'   => $new_goods_id,
+                            'attr_id'    => $attr_id,
+                            'attr_value' => $v1,
+                            'attr_price' => $price,
+                        ];
+                        array_push($goods_attr_insert_arr,$temp);
+                    }
+                }
+                DB::table('goods_attr')->insert($goods_attr_insert_arr);
+            }
+            // 相册
+            $album_path = $req_data['album_path'] ?? '';
+            $album_path_arr = [];
+            if (!empty($album_path)) {
+                $album_path_arr = json_decode($album_path, true);
+            }
+            $album_thumb_path = $req_data['album_thumb_path'] ?? '';
+            $album_thumb_path_arr = [];
+            if (!empty($album_thumb_path)) {
+                $album_thumb_path_arr = json_decode($album_thumb_path, true);
+            }
+            if (!empty($album_path_arr)) {
+                $goods_ext_img_insert_arr = [];
+                foreach ($album_path_arr as $k => $v) {
+                    $temp = [
+                        'goods_id'            => $new_goods_id,
+                        'goods_ext_img'       => $v,
+                        'goods_ext_thumb_img' => $album_thumb_path_arr[$k] ?? '',
+                    ];
+                    array_push($goods_ext_img_insert_arr,$temp);
+                }
+                DB::table('goods_ext_img')->insert($goods_ext_img_insert_arr);
+            }
+            DB::commit();
+        } catch (\Exception $exception) {
+            DB::rollBack();
+            return res_fail($exception->getMessage());
+        }
         return res_fail();
         return res_success();
     }

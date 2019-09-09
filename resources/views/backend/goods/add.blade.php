@@ -59,7 +59,7 @@
                                         <label for="" class="col-sm-2 control-label">品牌：</label>
                                         <div class="col-sm-3">
                                             <select name="brand_id" id="brand_id" class="form-control">
-                                                <option value="0">选择品牌</option>
+                                                <option value="">选择品牌</option>
                                                 <?php foreach($brandData as $k=>$v): ?>
                                                 <?php $v = (array)$v;?>
                                                 <option value="{{$v['id']}}">{{$v['brand_name']}}</option>
@@ -85,8 +85,8 @@
                                         <div class="col-sm-3">
                                             <div style="margin: 5px 0;">
                                                 <input onclick="$(this).parent().append($(this).next('select').clone());" type="button" value="添加" class=" btn btn-success" />
-                                                <select name="ext_cat_id[]" id="ext_cat_id" class="form-control" style="margin: 5px 0">
-                                                    <option value="0">选择分类</option>
+                                                <select name="ext_cat_id[]" id="" class="form-control" style="margin: 5px 0">
+                                                    <option value="">选择分类</option>
                                                     <?php foreach($categoryData as $k=>$v):?>
                                                     <option value="{{$v['id']}}">
                                                         <?php echo str_repeat('-', 8*$v['level']).$v['category_name']; ?>
@@ -255,7 +255,7 @@
                                         <label for="" class="col-sm-2 control-label">商品类型：</label>
                                         <div class="col-sm-3">
                                             <select name="type_id" id="type_id" class="form-control">
-                                                <option value="0">选择类型</option>
+                                                <option value="">选择类型</option>
                                                 <?php foreach($typeData as $k=>$v): ?>
                                                 <?php $v = (array)$v;?>
                                                 <option value="{{$v['id']}}">{{$v['type_name']}}</option>
@@ -463,12 +463,27 @@
 
                 var goods_name = $('#goods_name').val();
                 if(goods_name == '') {
-                    alert('请输入商品名称');
-                    return false;
+                    // alert('请输入商品名称');
+                    // return false;
                 }
                 if (logo_path == '' || logo_thumb_path == '') {
-                    alert('请上传图片！');
-                    return false;
+                    // alert('请上传图片！');
+                    // return false;
+                }
+                var category_id = $("#category_id").find('option:selected').val();
+                if(category_id == '') {
+                    // alert('请选择商品分类');
+                    // return false;
+                }
+                var brand_id = $("#brand_id").find('option:selected').val();
+                if(brand_id == '') {
+                    // alert('请选择品牌');
+                    // return false;
+                }
+                var type_id = $("#type_id").find('option:selected').val();
+                if(type_id == '') {
+                    // alert('请选择品牌');
+                    // return false;
                 }
                 var market_price = $('#market_price').val();
                 if(market_price == '') {
@@ -477,20 +492,26 @@
                 }
                 var shop_price = $('#shop_price').val();
                 if(shop_price == '') {
-                    alert('请输入商品本店价');
-                    return false;
+                    // alert('请输入商品本店价');
+                    // return false;
                 }
                 var jifen = $('#jifen').val();
                 var jyz = $('#jyz').val();
                 var jifen_price = $('#jifen_price').val(); //积分兑换价
                 var is_promote = $('.is_promote:checked').val();
-                console.log('==is_promote=='+is_promote);
+                var promote_price = '';
+                var promote_start_time = '';
+                var promote_end_time = '';
                 if (is_promote == 1) {
-                    var promote_price = $('.promote_price').val();
-                    var promote_start_time = $('.promote_start_time').val();
-                    var promote_end_time = $('.promote_end_time').val();
-                    if(promote_price == '' || promote_start_time == '' || promote_end_time == '') {
+                    promote_price = $('#promote_price').val();
+                    promote_start_time = $('#promote_start_time').val();
+                    promote_end_time = $('#promote_end_time').val();
+                    if(promote_price == '' || promote_price == 0 || promote_start_time == '' || promote_end_time == '') {
                         alert('请输入促销价，或促销开始和结束时间');
+                        return false;
+                    }
+                    if (promote_start_time > promote_end_time ) {
+                        alert('促销开始时间应结束时间');
                         return false;
                     }
                 }
@@ -503,13 +524,20 @@
                 // 商品描述
                 var goods_desc = cur_ue.getContent();
                 // 会员价
-                var _member_price = {};
+                var member_price = {};
                 $("input[name ^='mp']").each(function (index,el) {
                     if($(this).val() != '' && $(this).val() != 0) {
 //                    _member_price.push($(this).attr('data-level-id') +':'+$(this).val());
-                        _member_price[$(this).attr('data-level-id')] = $(this).val();
+                        member_price[$(this).attr('data-level-id')] = $(this).val();
                     }
                 });
+                var ext_cat_id_arr = [];
+                $("select[name ^='ext_cat_id']").each(function (index,el) {
+                    if($(this).val() != '' && $(this).val() != 0) {
+                        ext_cat_id_arr.push($(this).val());
+                    }
+                });
+                var ext_cat_id = ext_cat_id_arr.length >0 ? ext_cat_id_arr.join(',') : '';
 
                 var goods_attribute_arr = {};
                 $("[name ^='ga']").each(function (index,el) {
@@ -550,9 +578,9 @@
 //       promote_start_time promote_end_time is_new is_hot is_best is_on_sale seo_keyword seo_description
 //   goods_desc mp['id'] type_id photo_multi
 
-                //商品相册,原图和缩略图
-                console.log(photo_multi_path);
-                console.log(photo_multi_thumb_path);
+
+                /*
+                 //商品相册,原图和缩略图
                 var new_photo_big = '';
                 var new_photo_thumb = '';
                 if(photo_multi_path.length >0) {
@@ -561,8 +589,7 @@
                 if(photo_multi_thumb_path.length >0) {
                     new_photo_thumb =  photo_multi_thumb_path.join(',');
                 }
-                console.log(new_photo_big);
-                console.log(new_photo_thumb);
+                 */
                 var url = "<?php echo url('backend/goods/addStore');?>";
                var form_param = $('#formSubmit').serialize();
                 $.ajax({
@@ -570,25 +597,33 @@
                     url:  url,
                     dataType: 'json',
                     data: {
-                        goods_name : goods_name,
-                        goods_img : logo_path,
-                        goods_thumb_img : logo_thumb_path,
-                        market_price : market_price,
-                        shop_price : shop_price,
-                        jifen : jifen,
-                        jifen_price : jifen_price,
-                        jyz : jyz,
-                        is_hot : is_hot,
-                        is_new : is_new,
-                        is_best : is_best,
-                        is_on_sale : is_on_sale,
-                        seo_keyword : seo_keyword,
-                        seo_description : seo_description,
-                        goods_desc : goods_desc,
-                        member_price : _member_price,
-                        photo_big : new_photo_big,
-                        photo_thumb : new_photo_thumb,
-                        form_param : form_param,
+                        goods_name          : goods_name,
+                        brand_id            : brand_id,
+                        category_id         : category_id,
+                        ext_cat_id          : ext_cat_id,
+                        goods_img           : logo_path,
+                        goods_thumb_img     : logo_thumb_path,
+                        market_price        : market_price,
+                        shop_price          : shop_price,
+                        jifen               : jifen,
+                        jifen_price         : jifen_price,
+                        jyz                 : jyz,
+                        is_promote          : is_promote,
+                        promote_price       : promote_price,
+                        promote_start_time  : promote_start_time,
+                        promote_end_time    : promote_end_time,
+                        is_hot              : is_hot,
+                        is_new              : is_new,
+                        is_best             : is_best,
+                        is_on_sale          : is_on_sale,
+                        seo_keyword         : seo_keyword,
+                        seo_description     : seo_description,
+                        goods_desc          : goods_desc,
+                        member_price        : member_price,
+                        type_id             : type_id,
+                        album_path          : JSON.stringify(photo_multi_path), // 相册原图
+                        album_thumb_path    : JSON.stringify(photo_multi_thumb_path), // 相册缩略图
+                        form_param          : form_param,
                         goods_attribute_arr : goods_attribute_arr,
                         attribute_price_arr : attribute_price_arr,
                     },
