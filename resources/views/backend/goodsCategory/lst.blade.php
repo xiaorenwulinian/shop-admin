@@ -11,7 +11,7 @@
 <section class="content-header">
     <h1>
         商品分类列表
-        <small> <a href="{{url('/backend/goodsCategory/add')}}" class="pull-right">商品文章分类</a></small>
+        <small> <a href="{{url('/backend/goodsCategory/add')}}" class="pull-right">商品分类添加</a></small>
     </h1>
 </section>
 

@@ -17,6 +17,13 @@ class TestController extends Controller
 //        $this->excel();
     }
 
+    public function arrayTools()
+    {
+        $needle = '';
+        $haystack = "jav_java_orjavascript_or_ja";
+//        $haystack
+    }
+
     /**
      * 测试 性能
      */

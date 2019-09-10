@@ -57,7 +57,7 @@
                             <th style="text-align: center"> <input type="checkbox" name="is_multi_select"  class="is_multi_select"> </th>
                             <th style="text-align: center">id</th>
                             <th style="text-align: center">商品名称</th>
-                            <th style="text-align: center">商品编号l</th>
+                            <th style="text-align: center">商品编号</th>
                             <th style="text-align: center">操作</th>
                         </tr>
                         </thead>

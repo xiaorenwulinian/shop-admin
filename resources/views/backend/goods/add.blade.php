@@ -460,30 +460,29 @@
                 }
             });
             $('.curSubmit').on('click',function () {
-
                 var goods_name = $('#goods_name').val();
                 if(goods_name == '') {
-                    // alert('请输入商品名称');
-                    // return false;
+                    alert('请输入商品名称');
+                    return false;
                 }
                 if (logo_path == '' || logo_thumb_path == '') {
-                    // alert('请上传图片！');
-                    // return false;
+                    alert('请上传图片！');
+                    return false;
                 }
                 var category_id = $("#category_id").find('option:selected').val();
                 if(category_id == '') {
-                    // alert('请选择商品分类');
-                    // return false;
+                    alert('请选择商品分类');
+                    return false;
                 }
                 var brand_id = $("#brand_id").find('option:selected').val();
                 if(brand_id == '') {
-                    // alert('请选择品牌');
-                    // return false;
+                    alert('请选择品牌');
+                    return false;
                 }
                 var type_id = $("#type_id").find('option:selected').val();
                 if(type_id == '') {
-                    // alert('请选择品牌');
-                    // return false;
+                    alert('请选择品牌');
+                    return false;
                 }
                 var market_price = $('#market_price').val();
                 if(market_price == '') {
@@ -492,8 +491,8 @@
                 }
                 var shop_price = $('#shop_price').val();
                 if(shop_price == '') {
-                    // alert('请输入商品本店价');
-                    // return false;
+                    alert('请输入商品本店价');
+                    return false;
                 }
                 var jifen = $('#jifen').val();
                 var jyz = $('#jyz').val();
@@ -519,15 +518,14 @@
                 var is_new = $('.is_new:checked').val();
                 var is_best = $('.is_best:checked').val();
                 var is_on_sale = $('.is_on_sale:checked').val();
-                var seo_keyword = $('.seo_keyword').val();
-                var seo_description = $('.seo_description').val();
+                var seo_keyword = $('#seo_keyword').val();
+                var seo_description = $('#seo_description').val();
                 // 商品描述
                 var goods_desc = cur_ue.getContent();
                 // 会员价
                 var member_price = {};
                 $("input[name ^='mp']").each(function (index,el) {
                     if($(this).val() != '' && $(this).val() != 0) {
-//                    _member_price.push($(this).attr('data-level-id') +':'+$(this).val());
                         member_price[$(this).attr('data-level-id')] = $(this).val();
                     }
                 });
@@ -573,11 +571,6 @@
                     }
                 });
                 console.log('===attribute_price_arr===',attribute_price_arr);
-                
-              //  category_id   ext_cat_id goods_img  market_price shop_price jifen_price is_promote promote_price
-//       promote_start_time promote_end_time is_new is_hot is_best is_on_sale seo_keyword seo_description
-//   goods_desc mp['id'] type_id photo_multi
-
 
                 /*
                  //商品相册,原图和缩略图
@@ -631,18 +624,16 @@
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                     },
                     success: function(ret){
-                        console.log(ret);
-                        if(ret.code == 200) {
+                        if (ret.code == 200) {
                             layer.msg('添加成功',{
                                 time:1000,
                                 icon: 6,
                                 end:function () {
-    //                               location.reload();
                                     location.href = "<?php echo url('backend/goods/lst');?>";
                                 }
                             })
                         } else {
-                            layer.msg(ret.msg, {icon: 5,time:1000,});
+                            alert(ret.msg);
                             return false;
                         }
                     }

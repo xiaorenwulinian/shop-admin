@@ -177,7 +177,7 @@ class GoodsController extends BackendBaseController
      */
     public function addStore(Request $request)
     {
-        /*
+
         $this->validate($request, [
             'goods_name'      => 'required|max:255',
             'category_id'      => 'required|integer',
@@ -192,10 +192,10 @@ class GoodsController extends BackendBaseController
             'goods_name.required'     => '分类必传',
             'goods_name.max'        => '标题应小于255个字！',
         ]);
-        */
+
         $req_data = $request->input();
-        $form_param = $request->input('form_param');
-        $form_data = parse_query($form_param);
+//        $form_param = $request->input('form_param');
+//        $form_data = parse_query($form_param);
         $goods_name          = $req_data['goods_name'];
         $brand_id            = $req_data['brand_id'];
         $category_id         = $req_data['category_id'];
@@ -248,8 +248,8 @@ class GoodsController extends BackendBaseController
 
         if ($is_promote == 1) {
             $insert_arr['promote_price']      = $promote_price;
-            $insert_arr['promote_start_time'] = $promote_start_time;
-            $insert_arr['promote_end_time']   = $promote_end_time;
+            $insert_arr['promote_start_time'] = strtotime($promote_start_time . ' 00:00:00');
+            $insert_arr['promote_end_time']   = strtotime($promote_end_time . ' 23:59:59');
         }
         DB::beginTransaction();
         try {
@@ -334,7 +334,6 @@ class GoodsController extends BackendBaseController
             DB::rollBack();
             return res_fail($exception->getMessage());
         }
-        return res_fail();
         return res_success();
     }
 
@@ -351,15 +350,48 @@ class GoodsController extends BackendBaseController
         ],[
             'id.required'   => 'ID必填！',
         ]);
-        $reqData =  $request->all();
-        $brandData = DB::table('brand')->where('id','=',$reqData['id'])->first();
-        $brandData = (array)$brandData;
-        if (empty($brandData)) {
+        $goodsId =  $request->input('id');
+        $goodsData = DB::table('goods')->where('id','=', $goodsId)->first();
+        $goodsData = (array)$goodsData;
+        if (empty($goodsData)) {
              return res_fail('非法攻击');
         }
+        $brandData = DB::table('brand')->where('is_del','=',0)->get();
+        $typeData = DB::table('type')->where('is_del','=',0)->get();
+        $categoryData = DB::table('goods_category')->where('is_del','=',0)->get();
+        $arrayTool = new ArrayTool();
+        $categoryData = $arrayTool->getTreeRec($categoryData);
+        $memberLevelData = DB::table('member_level')->where('is_del','=',0)->get();
+        // 拓展分类
+        $goodsExtCate = DB::table('goods_ext_category')->where('goods_id','=',$goodsId)->get();
+        $goodsExtCateIds = [];
+        foreach ($goodsExtCate as $v) {
+            if (!in_array($v->category_id, $goodsExtCateIds)) {
+                $goodsExtCateIds[] = $v->category_id;
+            }
+        }
+        // 会员价
+        $memberPrice = DB::table('member_price')->where('goods_id','=',$goodsId)->get();
+        $memberPriceData = [];
+        foreach ($memberPrice as $k => $v) {
+            $memberPriceData[$v->level_id] = $v->price;
+        }
+        // 商品属性
+        $goodsAttr = DB::table('goods_attr AS ga')
+            ->leftJoin('attribute AS a')
+            ->where('ga.goods_id','=',$goodsId)
+            ->orderBy('ga.attr_id')
+            ->get();
         $ret = [
-            'brandData' => $brandData,
+            'goodsData'        => $goodsData,
+            'brandData'        => $brandData,
+            'typeData'         => $typeData,
+            'categoryData'     => $categoryData,
+            'memberLevelData'  => $memberLevelData,
+            'goodsExtCateIds'  => $goodsExtCateIds,
+            'memberPriceData'  => $memberPriceData,
         ];
+
         return view('backend.brand.edit', $ret);
     }
 
