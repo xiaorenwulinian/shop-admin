@@ -284,13 +284,68 @@
                                                 <option value="">选择类型</option>
                                                 <?php foreach($typeData as $k=>$v): ?>
                                                 <?php $v = (array)$v;?>
-                                                <option value="{{$v['id']}}">{{$v['type_name']}}</option>
+                                                <option value="{{$v['id']}}" <?php echo $v['id'] == $goodsData['type_id'] ? 'selected="selected"' : ''?>>{{$v['type_name']}}</option>
                                                 <?php endforeach;?>
                                             </select>
                                         </div>
                                     </div>
                                     <div id="attr_container">
+                                        <?php
+                                            // 该商品已经存在的属性ID
+                                            $hasAttrId = [];
 
+                                        ?>
+                                        <?php foreach ($goodsAttrArr as $k => $v):?>
+                                            <div class='form-group'>
+                                                <label class='col-sm-2 control-label'><?php echo $v['attr_name'];?></label>
+                                                <div class='col-sm-3'>
+                                                     <?php
+                                                        if ($v['attr_type'] == 1) :
+                                                            if (!in_array($v['attr_id'], $hasAttrId)) {
+                                                                $operator = "[+]";
+                                                                $hasAttrId[] = $v['attr_id'];
+                                                            } else {
+                                                                $operator = "[-]";
+                                                            }
+                                                     ?>
+                                                        <a data-good-attr-id="{{$v['id']}}" onclick='addnew(this);' href='javascript:void(0);'>{{$operator}}</a>
+                                                     <?php endif;?>
+
+                                                     <?php
+                                                         $old_ = isset($v['attr_value']) && !empty($v['attr_value']) ? 'old_' : '';  // 是否设置过这个属性，已经设置过，该属性前添加 old_ 进行区分
+                                                     ?>
+                                                     <?php
+                                                         // 判断有没有可选值，如果有就是下拉框，否则是文本框
+                                                         if (!$v['attr_option_values']) :?>
+                                                            <input type='text' class='form-control'  data-attr-type-value='0'  data-attr-id="<?php echo $v['attr_id']?>"
+                                                                   name="{{$old_}}ga['{{$v['attr_id']}}'][{{$v['id']}}]" value="{{$v['attr_value']}}" />
+                                                     <?php
+                                                         else:
+                                                             $attr_option_values_arr = explode(',',$v['attr_option_values'])
+                                                      ?>
+                                                            <select name="{{$old_}}ga['{{$v['attr_id']}}'][$v['id']]" class='form-control' data-attr-type-value='1' data-attr-id={{$v['attr_id']}} >
+                                                                <option value="">请选择</option>
+                                                                <?php foreach ($attr_option_values_arr as $attr_option_values_one):;?>
+                                                                    <?php
+                                                                        if (isset($v['attr_value']) && $v['attr_value'] == $attr_option_values_one) {
+                                                                            $selected =  'selected="selected"';
+                                                                        } else {
+                                                                            $selected = '';
+                                                                        }
+                                                                        ?>
+                                                                    <option value="{{$attr_option_values_one}}"  {{$selected}} >
+                                                                        {{$attr_option_values_one}}
+                                                                    </option>
+                                                                <?php endforeach;?>
+                                                            </select>
+                                                     <?php endif;?>
+                                                    <?php if($v['attr_type'] == 1):?>
+                                                         属性价格(元)：
+                                                         <input class='form-control' data-attr-id={{$v['attr_id']}}  name="old_attr_price['{{$v['attr_id']}}']['{{$v['id']}}']" type='text' value="{{$v['attr_price']}}" />
+                                                    <?php endif;?>
+                                                </div>
+                                            </div>
+                                        <?php endforeach;?>
                                     </div>
                                 </div>
                                 <div role="tabpanel" class="tab-pane" id="nav_goods_img" style="padding-top: 20px;">

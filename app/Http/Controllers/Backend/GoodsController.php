@@ -377,7 +377,7 @@ class GoodsController extends BackendBaseController
         }
         // 商品属性
         $goodsAttr = DB::table('goods_attr AS ga')
-            ->select(['ga.attr_id','ga.attr_value','ga.attr_price','a.attr_name','a.attr_type','a.attr_option_values'])
+            ->select(['ga.id','ga.attr_id','ga.attr_value','ga.attr_price','a.attr_name','a.attr_type','a.attr_option_values'])
             ->leftJoin('attribute AS a','a.id','=','ga.attr_id')
             ->where('ga.goods_id','=',$goodsId)
             ->orderBy('ga.attr_id')
