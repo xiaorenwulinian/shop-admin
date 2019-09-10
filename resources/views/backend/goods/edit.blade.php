@@ -317,13 +317,13 @@
                                                      <?php
                                                          // 判断有没有可选值，如果有就是下拉框，否则是文本框
                                                          if (!$v['attr_option_values']) :?>
-                                                            <input type='text' class='form-control'  data-attr-type-value='0'  data-attr-id="<?php echo $v['attr_id']?>"
-                                                                   name="{{$old_}}ga['{{$v['attr_id']}}'][{{$v['id']}}]" value="{{$v['attr_value']}}" />
+                                                            <input type='text' class='form-control'  data-attr-type-value='0'  data-attr-id="<?php echo $v['attr_id']?>" 
+                                                                   name="{{$old_}}ga['{{$v['attr_id']}}']['{{$v['id']}}']" value="{{$v['attr_value']}}" />
                                                      <?php
                                                          else:
                                                              $attr_option_values_arr = explode(',',$v['attr_option_values'])
                                                       ?>
-                                                            <select name="{{$old_}}ga['{{$v['attr_id']}}'][$v['id']]" class='form-control' data-attr-type-value='1' data-attr-id={{$v['attr_id']}} >
+                                                            <select name="{{$old_}}ga['{{$v['attr_id']}}']['<?php echo $v['id'] ?? '';?>']" class='form-control' data-attr-type-value='1' data-attr-id={{$v['attr_id']}} >
                                                                 <option value="">请选择</option>
                                                                 <?php foreach ($attr_option_values_arr as $attr_option_values_one):;?>
                                                                     <?php
