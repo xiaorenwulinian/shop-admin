@@ -179,17 +179,16 @@ class GoodsController extends BackendBaseController
     {
 
         $this->validate($request, [
-            'goods_name'      => 'required|max:255',
-            'category_id'      => 'required|integer',
-            'brand_id'      => 'required|integer',
-            'type_id'      => 'required|integer',
-            'goods_img'      => 'required',
-            'goods_thumb_img'      => 'required',
+            'goods_name'        => 'required|max:255',
+            'category_id'       => 'required|integer',
+            'brand_id'          => 'required|integer',
+            'type_id'           => 'required|integer',
+            'goods_img'         => 'required',
+            'goods_thumb_img'   => 'required',
             'market_price'      => 'required',
-            'shop_price'      => 'required',
-            'goods_name'      => 'required|max:255',
+            'shop_price'        => 'required',
         ],[
-            'goods_name.required'     => '分类必传',
+            'goods_name.required'   => '分类必传',
             'goods_name.max'        => '标题应小于255个字！',
         ]);
 
@@ -378,10 +377,45 @@ class GoodsController extends BackendBaseController
         }
         // 商品属性
         $goodsAttr = DB::table('goods_attr AS ga')
-            ->leftJoin('attribute AS a')
+            ->select(['ga.attr_id','ga.attr_value','ga.attr_price','a.attr_name','a.attr_type','a.attr_option_values'])
+            ->leftJoin('attribute AS a','a.id','=','ga.attr_id')
             ->where('ga.goods_id','=',$goodsId)
             ->orderBy('ga.attr_id')
             ->get();
+        $attrIdArr = [];
+        $goodsAttrArr = [];
+        foreach ($goodsAttr as $v) {
+            if (!in_array($v->attr_id, $attrIdArr)) {
+                $attrIdArr[] = $v->attr_id;
+            }
+            $goodsAttrArr[] = (array)$v;
+        }
+        // 其他属性，1.添加该商品后，该属性分类又增添新的属性，2.添加时未选择的属性
+        $otherAttrData = DB::table('attribute')
+            ->select(['id AS attr_id','attr_name','attr_type','attr_option_values'])
+            ->where('type_id','=',$goodsData['type_id'])
+            ->where('is_del','=',0)
+            ->whereNotIn('id',$attrIdArr)
+            ->get();
+        $otherAttrArr = [];
+        foreach ($otherAttrData as $v) {
+            $otherAttrArr[] = (array)$v;
+        }
+        if ($otherAttrData) {
+            $goodsAttrArr = array_merge($goodsAttrArr,$otherAttrArr);
+            usort($goodsAttrArr,function ($a, $b) {
+                if ($a['attr_id'] == $b['attr_id']) {
+                    return 0 ;
+                }
+                return $a['attr_id'] >  $b['attr_id'] ? 1 : -1;
+            });
+        }
+        // 相册
+        $goodsExtImg = DB::table('goods_ext_img')->where('goods_id','=',$goodsId)->get();
+        $goodsExtImgData = [];
+        foreach ($goodsExtImg as $k => $v) {
+            $goodsExtImgData[] = (array)$v;
+        }
         $ret = [
             'goodsData'        => $goodsData,
             'brandData'        => $brandData,
@@ -390,9 +424,11 @@ class GoodsController extends BackendBaseController
             'memberLevelData'  => $memberLevelData,
             'goodsExtCateIds'  => $goodsExtCateIds,
             'memberPriceData'  => $memberPriceData,
+            'goodsAttrArr'     => $goodsAttrArr,
+            'goodsExtImgData'  => $goodsExtImgData,
         ];
 
-        return view('backend.brand.edit', $ret);
+        return view('backend.goods.edit', $ret);
     }
 
     /**

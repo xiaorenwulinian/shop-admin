@@ -323,17 +323,7 @@
         var photo_multi_path = [];
         var photo_multi_thumb_path = [];
 
-        /**
-         * 切换是否促销
-         * @param _this
-         */
-        function change_promote_type(_this) {
-            if ($(_this).val() == 1 ) {
-                $('.promote_price').removeAttr('disabled');
-            } else {
-                $('.promote_price').attr('disabled', 'disabled');
-            }
-        }
+
         $(function () {
 
             var cur_ue = UE.getEditor('goods_desc', {
@@ -722,6 +712,17 @@
             }
             else {
                 p.remove();
+            }
+        }
+        /**
+         * 切换是否促销
+         * @param _this
+         */
+        function change_promote_type(_this) {
+            if ($(_this).val() == 1 ) {
+                $('.promote_price').removeAttr('disabled');
+            } else {
+                $('.promote_price').attr('disabled', 'disabled');
             }
         }
     </script>

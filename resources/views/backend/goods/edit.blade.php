@@ -4,6 +4,10 @@
 @section('style')
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link href="/static/backend/jquery-file-upload-9.28.0/css/jquery.fileupload.css" rel="stylesheet" type="text/css"/>
+
+    <!--时间插件样式-->
+    <link href="/static/backend/bootstrap-datetimepicker-master/css/bootstrap-datetimepicker.css" rel="stylesheet" type="text/css"/>
+
     <style>
         .thumb_img{
             width: 200px;
@@ -15,8 +19,8 @@
 <!-- Content Header (Page header) -->
 <section class="content-header">
     <h1>
-        商品品牌编辑
-        <small> <a href="javascript:void(0);" onclick="window.history.back();" class="pull-right">商品品牌列表</a></small>
+        商品编辑
+        <small> <a href="javascript:void(0);" onclick="window.history.back();" class="pull-right">商品列表</a></small>
     </h1>
 
 </section>
@@ -30,33 +34,286 @@
                 </div>
                 <div class="box-body">
                     <form class="form-horizontal" id="formSubmit" action="">
-                        <input type="hidden" name="id" value="{{$brandData['id']}}">
-                        <div class="form-group">
-                            <label for="brand_name" class="col-sm-2 control-label">品牌名称：</label>
-                            <div class="col-sm-9">
-                                <input type="text" class="form-control" name="brand_name" id="brand_name" value="{{$brandData['brand_name']}}">
-                            </div>
-                        </div>
+                        <input type="hidden" name="id" value="{{$goodsData['id']}}">
+                        <div>
 
-                        <div class="form-group">
-                            <label for="site_url" class="col-sm-2 control-label">网站地址：</label>
-                            <div class="col-sm-9">
-                                <input type="text" class="form-control" name="site_url" id="site_url" value="{{$brandData['site_url']}}">
-                            </div>
-                        </div>
+                            <!-- Nav tabs -->
+                            <ul class="nav nav-tabs" role="tablist">
+                                <li role="presentation" class="active"><a href="#nav_base_info" aria-controls="home" role="tab" data-toggle="tab">基本信息</a></li>
+                                <li role="presentation"><a href="#nav_goods_description" aria-controls="profile" role="tab" data-toggle="tab">商品描述</a></li>
+                                <li role="presentation"><a href="#nav_member_price" aria-controls="messages" role="tab" data-toggle="tab">会员价格</a></li>
+                                <li role="presentation"><a href="#nav_goods_attribute" aria-controls="settings" role="tab" data-toggle="tab">商品属性</a></li>
+                                <li role="presentation"><a href="#nav_goods_img" aria-controls="settings" role="tab" data-toggle="tab">商品相册</a></li>
+                            </ul>
 
-                        <div class="form-group">
-                            <label for="" class="col-sm-2 control-label">图片</label>
-                            <div class="col-sm-5" >
-                                <button type="button" class="btn btn-primary upload_logo_button "> 上传图片 </button>
-                                <div class="img_show_content" style="margin-top: 10px;">
-                                    <div>
-                                        <a src="javascript:void(0);" data-id="{{$brandData['id']}}" onclick="delete_logo_img(this);">删除</a><br>
-                                        <img class="thumb_img" src="{{$brandData['brand_img']}}"/>
+                            <!-- Tab panes -->
+                            <div class="tab-content">
+                                <div style="margin: 20px 0;"></div>
+                                <div role="tabpanel" class="tab-pane active" id="nav_base_info">
+                                    <div class="form-group">
+                                        <label for="goods_name" class="col-sm-2 control-label">商品名称：</label>
+                                        <div class="col-sm-3">
+                                            <input type="text" class="form-control" name="goods_name" id="goods_name" value="{{$goodsData['goods_name']}}">
+                                        </div>
+                                        <label for="" class="col-sm-2 control-label">品牌：</label>
+                                        <div class="col-sm-3">
+                                            <select name="brand_id" id="brand_id" class="form-control">
+                                                <option value="">选择品牌</option>
+                                                <?php foreach($brandData as $k=>$v): ?>
+                                                    <?php $v = (array)$v;?>
+                                                    <option value="{{$v['id']}}" <?php echo $v['id'] == $goodsData['brand_id'] ? 'selected="selected"' : '';?> >
+                                                        {{$v['brand_name']}}
+                                                    </option>
+                                                <?php endforeach;?>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="" class="col-sm-2 control-label">商品分类：</label>
+                                        <div class="col-sm-3">
+                                            <select name="category_id" id="category_id" class="form-control">
+                                                <option value="0">选择分类</option>
+                                                <?php foreach($categoryData as $k=>$v):?>
+                                                <option value="{{$v['id']}}" <?php echo $v['id'] == $goodsData['category_id'] ? 'selected="selected"' : '';?>>
+                                                    <?php echo str_repeat('-', 8*$v['level']).$v['category_name']; ?>
+                                                </option>
+                                                <?php endforeach;?>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="" class="col-sm-2 control-label">扩展分类：</label>
+                                        <div class="col-sm-3">
+                                            <div style="margin: 5px 0;">
+                                                <input onclick="$(this).parent().append($(this).next('select').clone());" type="button" value="添加" class=" btn btn-success" />
+
+                                                <?php if (count($goodsExtCateIds) == 0):?>
+                                                    <select name="ext_cat_id[]" id="" class="form-control" style="margin: 5px 0">
+                                                        <option value="">选择分类</option>
+                                                        <?php foreach($categoryData as $k=>$v):?>
+                                                        <option value="{{$v['id']}}" >
+                                                            <?php echo str_repeat('-', 8*$v['level']).$v['category_name']; ?>
+                                                        </option>
+                                                        <?php endforeach;?>
+                                                    </select>
+                                                <?php else:?>
+                                                    <?php foreach ($goodsExtCateIds as $cateId ) :?>
+                                                    <select name="ext_cat_id[]" id="" class="form-control" style="margin: 5px 0">
+                                                    <option value="">选择分类</option>
+                                                    <?php foreach($categoryData as $k=>$v):?>
+                                                        <option value="{{$v['id']}}" <?php echo $v['id'] == $cateId ? 'selected="selected"' : '';?> >
+                                                            <?php echo str_repeat('-', 8*$v['level']).$v['category_name']; ?>
+                                                        </option>
+                                                    <?php endforeach;?>
+                                                </select>
+                                                    <?php endforeach;?>
+                                                <?php endif;?>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="" class="col-sm-2 control-label">商品图片</label>
+                                        <div class="col-sm-5" >
+                                            <button type="button" class="btn btn-primary upload_logo_button "> 上传图片 </button>
+                                            <div class="img_show_content" style="margin-top: 10px;">
+                                                <div>
+                                                    <a src="javascript:void(0);" data-id="{{$goodsData['id']}}" onclick="delete_logo_img(this);">删除</a><br>
+                                                    <img class="thumb_img" src="{{$goodsData['goods_img']}}"/>
+                                                </div>
+                                            </div>
+                                            <input id="goods_img" name="goods_img" class="goods_img" type="file" style="display: none">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="market_price" class="col-sm-2 control-label">市场价(元)：</label>
+                                        <div class="col-sm-3">
+                                            <input type="text" class="form-control" name="market_price" id="market_price" value="{{$goodsData['market_price']}}">
+                                        </div>
+                                        <label for="shop_price" class="col-sm-2 control-label">本店价(元)：</label>
+                                        <div class="col-sm-3">
+                                            <input type="text" class="form-control" name="shop_price" id="shop_price" value="{{$goodsData['shop_price']}}">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="jifen" class="col-sm-2 control-label">赠送积分(不填和商品价格相同)：</label>
+                                        <div class="col-sm-3">
+                                            <input type="text" class="form-control" name="jifen" id="jifen" value="<?php echo $goodsData['jifen'] ?? 0;?>">
+                                        </div>
+
+                                        <label for="jyz" class="col-sm-2 control-label">赠送经验值：</label>
+                                        <div class="col-sm-3">
+                                            <input type="text" class="form-control" name="jyz" id="jyz" value="<?php echo $goodsData['jifen'] ?? 0;?>">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="jifen_price" class="col-sm-2 control-label">积分兑换，需要的积分数:（不填代表不能使用积分兑换）</label>
+                                        <div class="col-sm-3">
+                                            <input type="text" class="form-control" name="jifen_price" id="jifen_price" value="<?php echo $goodsData['jifen'] ?? 0;?>">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+
+                                        <label for="" class="col-sm-2 control-label">是否促销</label>
+                                        <div class="col-sm-3">
+                                            <label class="radio-inline">
+                                                <input type="radio" name="is_promote" class="is_promote" value="0" onclick="change_promote_type(this)"
+                                                    <?php echo $goodsData['is_promote'] == 0 ? 'checked="checkde"' : '' ?>  > 否
+                                            </label>
+                                            <label class="radio-inline">
+                                                <input type="radio" name="is_promote" class=" is_promote" value="1" onclick="change_promote_type(this)"
+                                                    <?php echo $goodsData['is_promote'] == 1 ? 'checked="checkde"' : '' ?> > 是
+                                            </label>
+                                        </div>
+                                        <label for="" class="col-sm-2 control-label">促销价：</label>
+                                        <div class="col-sm-3">
+                                            <input type="text" class="form-control promote_price" name="promote_price" id="promote_price"
+                                                   <?php if ($goodsData['is_promote'] == 0) echo 'disabled="disabled"' ;?>
+                                                   value="<?php echo $goodsData['promote_price'] ?? 0;?>" >
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="" class="col-sm-2 control-label">促销开始时间：</label>
+                                        <div class="col-sm-3">
+                                            <input type="text" class="form-control promote_price"   name="promote_start_time" id="promote_start_time"
+                                                   <?php if ($goodsData['is_promote'] == 0) echo 'disabled="disabled"' ;?>
+                                                   value="<?php echo $goodsData['promote_start_time'] ? date('Y-m-d',$goodsData['promote_start_time']) : '';?>" />
+                                        </div>
+                                        <label for="" class="col-sm-2 control-label">促销结束时间：</label>
+                                        <div class="col-sm-3">
+                                            <input type="text" class="form-control promote_price"   name="promote_end_time" id="promote_end_time"
+                                                   <?php if ($goodsData['is_promote'] == 0) echo 'disabled="disabled"' ;?>
+                                                   value="<?php echo $goodsData['promote_end_time'] ? date('Y-m-d',$goodsData['promote_end_time']) : '';?>" />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="" class="col-sm-2 control-label">是否新品</label>
+                                        <div class="col-sm-3">
+                                            <label class="radio-inline">
+                                                <input type="radio" name="is_new" class=" is_new" value="0" <?php echo $goodsData['is_new'] == 0 ? 'checked="checkde"' : '' ?>  /> 否
+                                            </label>
+                                            <label class="radio-inline">
+                                                <input type="radio" name="is_new" class=" is_new" value="1"  <?php echo $goodsData['is_new'] == 1 ? 'checked="checkde"' : '' ?>  /> 是
+                                            </label>
+                                        </div>
+
+                                        <label for="" class="col-sm-2 control-label">是否热卖</label>
+                                        <div class="col-sm-3">
+                                            <label class="radio-inline">
+                                                <input type="radio" name="is_hot" class="is_hot" value="0" <?php echo $goodsData['is_hot'] == 0 ? 'checked="checkde"' : '' ?>  /> 否
+                                            </label>
+                                            <label class="radio-inline">
+                                                <input type="radio" name="is_hot" class=" is_hot" value="1" <?php echo $goodsData['is_hot'] == 1 ? 'checked="checkde"' : '' ?>  /> 是
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="" class="col-sm-2 control-label">是否商户推荐</label>
+                                        <div class="col-sm-3">
+                                            <label class="radio-inline">
+                                                <input type="radio" name="is_best" class=" is_best" value="0" <?php echo $goodsData['is_best'] == 0 ? 'checked="checkde"' : '' ?>  /> 否
+                                            </label>
+                                            <label class="radio-inline">
+                                                <input type="radio" name="is_best" class=" is_best" value="1" <?php echo $goodsData['is_best'] == 1 ? 'checked="checkde"' : '' ?>  /> 是
+                                            </label>
+                                        </div>
+
+                                        <label for="" class="col-sm-2 control-label">是否上架</label>
+                                        <div class="col-sm-3">
+                                            <label class="radio-inline">
+                                                <input type="radio" name="is_on_sale" class=" is_on_sale" value="0" <?php echo $goodsData['is_on_sale'] == 0 ? 'checked="checkde"' : '' ?>  /> 否
+                                            </label>
+                                            <label class="radio-inline">
+                                                <input type="radio" name="is_on_sale" class=" is_on_sale" value="1" <?php echo $goodsData['is_on_sale'] == 1 ? 'checked="checkde"' : '' ?>  /> 是
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="" class="col-sm-2 control-label">seo优化_关键字</label>
+                                        <div class="col-sm-9">
+                                            <input type="text" class="form-control" name="seo_keyword" id="seo_keyword" value="{{$goodsData['seo_keyword']}}" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="" class="col-sm-2 control-label">seo优化_描述</label>
+                                        <div class="col-sm-9">
+                                            <input type="text" class="form-control" name="seo_description" id="seo_description" value="{{$goodsData['seo_description'] }}" />
+                                        </div>
                                     </div>
                                 </div>
-                                <input id="brand_img" name="brand_img" class="brand_img" type="file" style="display: none">
+                                <div role="tabpanel" class="tab-pane" id="nav_goods_description" style="padding-top: 20px" >
+                                    <div class="form-group">
+                                        <label for="" class="col-sm-2 control-label">商品描述</label>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-offset-1 col-sm-10">
+                                            <textarea id="goods_desc" class="goods_desc" name="goods_desc">{{$goodsData['goods_desc']}}</textarea>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div role="tabpanel" class="tab-pane" id="nav_member_price">
+                                    <div class="form-group" style="text-align: center;color: black;font-weight: 700">
+                                        <h4 >
+                                            会员价格（如果没有填会员价格就按折扣率计算价格，如果填了就按填的价格算，不再打折）
+                                        </h4>
+                                    </div>
+                                    <?php foreach ($memberLevelData as $k => $v): ?>
+                                        <?php  $v = (array)$v; ?>
+                                        <div class="form-group">
+                                            <label for="" class="col-sm-3 control-label">
+                                                {{$v['level_name']}}（<?php echo $v['rate']/10; ?> 折） ：
+                                            </label>
+                                            <div class="col-sm-7">
+                                                ￥<input type="text" size="10" data-level-id="{{$v['id']}}"  name="mp[{{$v['id']}}]"
+                                                    value="<?php echo isset($memberPriceData[$v['id']]) ? $memberPriceData[$v['id']] : '' ;?>" /> 元
+                                            </div>
+                                        </div>
+                                    <?php endforeach; ?>
+                                </div>
+
+                                <div role="tabpanel" class="tab-pane" id="nav_goods_attribute">
+                                    <div class="form-group">
+                                        <label for="" class="col-sm-2 control-label">商品类型：</label>
+                                        <div class="col-sm-3">
+                                            <select name="type_id" id="type_id" class="form-control">
+                                                <option value="">选择类型</option>
+                                                <?php foreach($typeData as $k=>$v): ?>
+                                                <?php $v = (array)$v;?>
+                                                <option value="{{$v['id']}}">{{$v['type_name']}}</option>
+                                                <?php endforeach;?>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div id="attr_container">
+
+                                    </div>
+                                </div>
+                                <div role="tabpanel" class="tab-pane" id="nav_goods_img" style="padding-top: 20px;">
+                                    <div class="form-group">
+                                        <label for="" class="col-sm-2 control-label">商品相册</label>
+                                        <div class="col-sm-5" >
+                                            <button type="button" class="btn btn-primary upload_photo_button_multi "> 上传相册 </button>
+                                            <div class="photo_multi_show_content" style="margin-top: 10px;">
+                                                <?php foreach($goodsExtImgData as $extImg):?>
+                                                    <div>
+                                                        <a src="javascript:void(0);" data-id="{{$extImg['id']}}"  onclick='delete_photo_multi(this);'  >
+                                                            删除
+                                                        </a><br>
+                                                        <img class="thumb_img" src="{{$extImg['goods_ext_img']}} "/>
+                                                    </div>
+                                                <?php endforeach;?>
+                                            </div>
+                                            <input id="photo_multi" name="photo_multi" class="photo_multi" type="file" style="display: none">
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
+
                         </div>
 
                         <div class="form-group">
@@ -74,30 +331,65 @@
 @endsection
 
 @section('script')
+    <!--时间插件-->
+    <script src="/static/backend/bootstrap-datetimepicker-master/js/bootstrap-datetimepicker.js" type="text/javascript"></script>
+    <script src="/static/backend/bootstrap-datetimepicker-master/js/locales/bootstrap-datetimepicker.zh-CN.js" type="text/javascript" ></script>
+
     <!--上传图片插件-->
     <script src="/static/backend/jquery-file-upload-9.28.0/js/vendor/jquery.ui.widget.js" type="text/javascript"></script>
     <script src="/static/backend/jquery-file-upload-9.28.0/js/jquery.fileupload.js" type="text/javascript"></script>
     <script src="/static/backend/jquery-file-upload-9.28.0/js/jquery.iframe-transport.js" type="text/javascript"></script>
 
-<script>
-    var logo_path = "<?php echo $brandData['brand_img'];?>";
-    var brand_id = "<?php echo $brandData['id'];?>";
+    <script src="/static/backend/ueditor/ueditor.config.js" type="text/javascript" ></script>
+    <script src="/static/backend/ueditor/ueditor.all.min.js" type="text/javascript" ></script>
+    <!--建议手动加在语言，避免在ie下有时因为加载语言失败导致编辑器加载失败-->
+    <!--这里加载的语言文件会覆盖你在配置项目里添加的语言类型，比如你在配置项目里配置的是英文，这里加载的中文，那最后就是中文-->
+    <script src="/static/backend/ueditor/lang/zh-cn/zh-cn.js" type="text/javascript" ></script>
+
+    <script>
+    var logo_path = "<?php echo $goodsData['goods_img'];?>";
+    var logo_thumb_path = "<?php echo $goodsData['goods_thumb_img'];?>";
+
+    var goods_id = "<?php echo $goodsData['id'];?>";
 
     $(function () {
+        var cur_ue = UE.getEditor('goods_desc', {
+            "initialFrameWidth" : "100%",   // 宽
+            "initialFrameHeight" : 600,      // 高
+            "maximumWords" : 10000            // 最大可以输入的字符数量
+        });
+
+        $("#promote_start_time").datetimepicker({
+            format: 'yyyy-mm-dd',
+            // format: 'yyyy-mm-dd hh:ii:ss', 年月日时分秒，搜索不需要时分秒
+            language : 'zh-CN',
+            autoclose: 1,
+            todayBtn: 1,
+            minView:'month',
+        });
+
+        $("#promote_end_time").datetimepicker({
+            format: 'yyyy-mm-dd',
+            // format: 'yyyy-mm-dd hh:ii:ss', 年月日时分秒，搜索不需要时分秒
+            language : 'zh-CN',
+            autoclose: 1,
+            todayBtn: 1,
+            minView:'month',
+        });
 
         //单文件上传
         $('.upload_logo_button').on('click',function(){
-            $('#brand_img').click();
+            $('#goods_img').click();
         });
-        $('#brand_img').fileupload({
+        $('#goods_img').fileupload({
             autoUpload: true,//是否自动上传
-            url: "{{ url('backend/brand/editUpload') }}",
+            url: "{{ url('backend/goods/editUpload') }}",
             dataType: 'json',
             add: function (e,data) {
-                $("#brand_img").fileupload(
+                $("#goods_img").fileupload(
                     'option',
                     'formData',
-                    {'brand_id': brand_id}
+                    {'goods_id': goods_id}
                 ); // 传参不能放在初始化语句中，否则只能传递参数的初始化值
                 data.submit();
             },
@@ -107,11 +399,11 @@
                 if(_result.code == 200) {
                     var _data = _result.data;
                     logo_path = _data.logo_file_path;
-                    var _html ="";
-                    _html +="<div>";
-                    _html +="<a src='javascript:void(0);'data-id='"+brand_id+"' onclick='delete_logo_img(this);'  >删除</a><br>";
-                    _html +="<img class='thumb_img' src='"+_data.logo_file_path+"'/>";
-                    _html +="</div>";
+                    var _html = "";
+                    _html += "<div>";
+                    _html +=    "<a src='javascript:void(0);'data-id='"+goods_id+"' onclick='delete_logo_img(this);'  >删除</a><br>";
+                    _html +=    "<img class='thumb_img' src='"+_data.logo_file_path+"'/>";
+                    _html += "</div>";
 
                     $('.img_show_content').html(_html);
                 }
@@ -190,6 +482,33 @@
             });
         }
         return false;
+    }
+
+    // 点击+号
+    function addnew(a) {
+        var p = $(a).parent();  // 选中a标签所在的p标签
+        // 先获取A标签中的内容
+        if($(a).html() == "[+]") {
+            var newP = p.clone();  // 把p克隆一份
+            newP.find("a").html("[-]");  // 把克隆出来的P里面的a标签变成-号
+            p.after(newP); // 放在后面
+        }
+        else {
+            p.remove();
+        }
+    }
+
+
+    /**
+     * 切换是否促销
+     * @param _this
+     */
+    function change_promote_type(_this) {
+        if ($(_this).val() == 1 ) {
+            $('.promote_price').removeAttr('disabled');
+        } else {
+            $('.promote_price').attr('disabled', 'disabled');
+        }
     }
 </script>
 @endsection
