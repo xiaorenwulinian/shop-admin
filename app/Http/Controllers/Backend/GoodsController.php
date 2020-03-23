@@ -7,7 +7,11 @@ use App\Common\Library\Tools\FileTool;
 use App\Common\Logic\BrandLogic;
 use App\Common\Logic\GoodsLogic;
 use App\Http\Requests\ArticleEditStoresRequest;
+use App\Model\Attribute;
+use App\Model\AttrSaleValue;
 use App\Model\Brand;
+use App\Model\Goods;
+use App\Model\GoodsSaleAttr;
 use function GuzzleHttp\Psr7\parse_query;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Backend\BackendBaseController;
@@ -154,20 +158,6 @@ class GoodsController extends BackendBaseController
     }
 
 
-    public function ajaxGetAttr(Request $request)
-    {
-        $typeId = $request->input('type_id');
-        $attrData = DB::table('attribute')
-            ->where('is_del','=',0)
-            ->where('type_id','=',$typeId)
-            ->orderBy('id')
-            ->get();
-        $ret = [
-            'attrData' => $attrData
-        ];
-        return res_success($ret);
-    }
-
 
     /**
      * 添加保存
@@ -185,7 +175,6 @@ class GoodsController extends BackendBaseController
             'type_id'           => 'required|integer',
             'goods_img'         => 'required',
             'goods_thumb_img'   => 'required',
-            'market_price'      => 'required',
             'shop_price'        => 'required',
         ],[
             'goods_name.required'   => '分类必传',
@@ -201,11 +190,10 @@ class GoodsController extends BackendBaseController
         $ext_cat_id          = $req_data['ext_cat_id'] ?? '';
         $goods_img           = $req_data['goods_img'];
         $goods_thumb_img     = $req_data['goods_thumb_img'];
-        $market_price        = $req_data['market_price'];
         $shop_price          = $req_data['shop_price'];
         $jifen               = $req_data['jifen'];
         $jifen_price         = $req_data['jifen_price'];
-        $jyz                 = $req_data['jyz'];
+        $jyz                 = $req_data['jifen'];
         $is_hot              = $req_data['is_hot'];
         $is_promote          = $req_data['is_promote'];
         $promote_price       = $req_data['promote_price'];
@@ -219,7 +207,6 @@ class GoodsController extends BackendBaseController
         $type_id             = $req_data['type_id'];
         $goods_desc          = $req_data['goods_desc'] ?? '';
 
-
         $insert_arr = [
             'goods_name'      => $goods_name,
             'goods_number'    => uniqid(),
@@ -227,7 +214,6 @@ class GoodsController extends BackendBaseController
             'brand_id'        => $brand_id,
             'goods_img'       => $goods_img,
             'goods_thumb_img' => $goods_thumb_img,
-            'market_price'    => $market_price,
             'shop_price'      => $shop_price,
             'jifen'           => $jifen,
             'jyz'             => $jyz,
@@ -253,7 +239,9 @@ class GoodsController extends BackendBaseController
         DB::beginTransaction();
         try {
             $new_goods_id = DB::table('goods')->insertGetId($insert_arr);
-            //会员价
+            /**
+             * 会员价
+             */
             $member_price = $req_data['member_price'] ?? [];
             if (!empty($market_price)) {
                 $mp_insert_arr = [];
@@ -267,7 +255,9 @@ class GoodsController extends BackendBaseController
                 }
                 DB::table('member_price')->insert($mp_insert_arr);
             }
-            // 商品拓展分类
+            /**
+             * 商品拓展分类
+             */
             $ext_cat_id_arr = [];
             if (!empty($ext_cat_id)) {
                 $ext_cat_id_arr = explode(',',$ext_cat_id);
@@ -283,29 +273,49 @@ class GoodsController extends BackendBaseController
                 }
                 DB::table('goods_ext_category')->insert($ext_cat_insert_arr);
             }
-            // 商品属性
-            $goods_attribute_arr = $request->input('goods_attribute_arr'); // 属性类型
-            $attribute_price_arr = $request->input('attribute_price_arr'); // 属性价格
-            if (!empty($goods_attribute_arr)) {
-                $goods_attr_insert_arr = [];
-                foreach ($goods_attribute_arr as $attr_id => $attr_value) {
-                    foreach ($attr_value as $k1 => $v1) {
-                        if (empty($v)) {
-                            continue;
-                        }
-                        $price = isset($attribute_price_arr[$attr_id][$k1]) ? $attribute_price_arr[$attr_id][$k1] : 0;
-                        $temp = [
-                            'goods_id'   => $new_goods_id,
-                            'attr_id'    => $attr_id,
-                            'attr_value' => $v1,
-                            'attr_price' => $price,
-                        ];
-                        array_push($goods_attr_insert_arr,$temp);
-                    }
+            /**
+             * 商品属性
+             */
+            // 销售属性
+            $sale_attr = $request->input('goods_sale_attr_arr');
+
+            if (!empty($sale_attr)) {
+                $sale_attr_ids = explode(',',$sale_attr);
+                $sale_attr_id_arr = array_unique($sale_attr_ids);
+                $attr_sale_value_data = DB::table('attr_sale_value')->whereIn('id', $sale_attr_id_arr)->get();
+                $goods_sale_attr_insert = [];
+                foreach ($attr_sale_value_data as  $v) {
+                    $temp = [
+                        'goods_id'        => $new_goods_id,
+                        'attr_id'         => $v->attribute_id,
+                        'attr_sale_id'    => $v->id,
+                        'attr_sale_value' => $v->attr_name_value,
+                        'type_id'         => $type_id,
+                    ];
+                    array_push($goods_sale_attr_insert, $temp);
+
                 }
-                DB::table('goods_attr')->insert($goods_attr_insert_arr);
+                DB::table('goods_sale_attr')->insert($goods_sale_attr_insert);
             }
-            // 相册
+            // 产品规格
+            $goods_desc_attr = $request->input('goods_desc_attr');
+            if (!empty($goods_desc_attr)) {
+                $goods_desc_attr_arr = json_decode($goods_desc_attr, true);
+                $goods_desc_attr_insert = [];
+                foreach ($goods_desc_attr_arr as  $attr_id => $attr_value) {
+                    $temp = [
+                        'goods_id'   => $new_goods_id,
+                        'attr_id'    => $attr_id,
+                        'attr_value' => $attr_value,
+                        'type_id'    => $type_id,
+                    ];
+                    array_push($goods_desc_attr_insert, $temp);
+                }
+                DB::table('goods_desc_attr')->insert($goods_desc_attr_insert);
+            }
+            /**
+             * 相册
+             */
             $album_path = $req_data['album_path'] ?? '';
             $album_path_arr = [];
             if (!empty($album_path)) {
@@ -375,9 +385,49 @@ class GoodsController extends BackendBaseController
         foreach ($memberPrice as $k => $v) {
             $memberPriceData[$v->level_id] = $v->price;
         }
-        // 商品属性
+        // 商品销售属性
+
+        $saleAttrData =  Attribute::where([
+                                    ['is_del', '=', 0],
+                                    ['attr_type', '=', 2],
+                                    ['type_id', '=', $goodsData['type_id']],
+                                ])
+                                ->with('attrSaleValue')
+                                ->get()
+                                ->toArray();
+        $hasSelectSaleAttr = DB::table('goods_sale_attr AS gsa')
+            ->leftJoin('attribute','attribute.id','=','gsa.attr_id')
+            ->select('gsa.*','attribute.attr_name')
+            ->where('gsa.goods_id', $goodsId)
+            ->orderBy('gsa.attr_id')->get()
+            ->toArray();
+        $hasSelectSaleAttr1 = GoodsSaleAttr::from('goods_sale_attr AS gsa')
+            ->leftJoin('attribute','attribute.id','=','gsa.attr_id')
+//            ->select('gsa.*','attribute.attr_name')
+            ->where('gsa.goods_id', $goodsId)
+            ->orderBy('gsa.attr_id')->get()
+            ->toArray();
+
+        $selectSaleAttr = [];
+        foreach ($hasSelectSaleAttr as $v) {
+            $v = (array)$v;
+            $v['attr_sale_value'] = AttrSaleValue::where('attribute_id',$v['attr_id'])->pluck('attr_name_value','id')->toArray();
+
+            $selectSaleAttr[$v['attr_id']][] = $v;
+
+        }
+        $selectSaleAttrIds = array_keys($selectSaleAttr);
+        $notSelectSaleAttr = [];
+        foreach ($saleAttrData as $v) {
+            if (!in_array($v['id'], $selectSaleAttrIds)) {
+                $notSelectSaleAttr[] = $v;
+            }
+        }
+
+        /*
+         // 商品属性
         $goodsAttr = DB::table('goods_attr AS ga')
-            ->select(['ga.id','ga.attr_id','ga.attr_value','ga.attr_price','a.attr_name','a.attr_type','a.attr_option_values'])
+            ->select(['ga.id','ga.attr_id','ga.attr_value','a.attr_name','a.attr_type','a.attr_option_values'])
             ->leftJoin('attribute AS a','a.id','=','ga.attr_id')
             ->where('ga.goods_id','=',$goodsId)
             ->orderBy('ga.attr_id')
@@ -397,6 +447,7 @@ class GoodsController extends BackendBaseController
             ->where('is_del','=',0)
             ->whereNotIn('id',$attrIdArr)
             ->get();
+
         $otherAttrArr = [];
         foreach ($otherAttrData as $v) {
             $otherAttrArr[] = (array)$v;
@@ -409,7 +460,7 @@ class GoodsController extends BackendBaseController
                 }
                 return $a['attr_id'] >  $b['attr_id'] ? 1 : -1;
             });
-        }
+        }*/
         // 相册
         $goodsExtImg = DB::table('goods_ext_img')->where('goods_id','=',$goodsId)->get();
         $goodsExtImgData = [];
@@ -424,7 +475,7 @@ class GoodsController extends BackendBaseController
             'memberLevelData'  => $memberLevelData,
             'goodsExtCateIds'  => $goodsExtCateIds,
             'memberPriceData'  => $memberPriceData,
-            'goodsAttrArr'     => $goodsAttrArr,
+            'selectSaleAttr'   => $selectSaleAttr,
             'goodsExtImgData'  => $goodsExtImgData,
         ];
 
@@ -495,22 +546,154 @@ class GoodsController extends BackendBaseController
     public function editStore(Request $request)
     {
         $this->validate($request, [
-            'id'            => "required",
-            'brand_name'    => 'required|max:255',
-            'site_url'      => 'required|max:255',
+            'id'                => "required",
+            'goods_name'        => 'required|max:255',
+            'category_id'       => 'required|integer',
+            'brand_id'          => 'required|integer',
+            'type_id'           => 'required|integer',
+            'shop_price'        => 'required',
         ],[
-            'brand_name.required'     => '分类必传',
-            'brand_name.max'        => '标题应小于255个字！',
+            'goods_name.required'   => '分类必传',
+            'goods_name.max'        => '标题应小于255个字！',
         ]);
 
-        $reqData = $request->input();
-        $brand = Brand::find($reqData['id']);
-        if (empty($brand)) {
+        $req_data = $request->input();
+        $form_param = $request->input('form_param');
+        $form_data = parse_query($form_param);
+        $goods_id            = $req_data['id'];
+        $goods_name          = $req_data['goods_name'];
+        $brand_id            = $req_data['brand_id'];
+        $category_id         = $req_data['category_id'];
+        $ext_cat_id          = $req_data['ext_cat_id'] ?? '';
+        $shop_price          = $req_data['shop_price'];
+        $jifen               = $req_data['jifen'];
+        $jifen_price         = $req_data['jifen_price'];
+        $jyz                 = $req_data['jifen'];
+        $is_hot              = $req_data['is_hot'];
+        $is_promote          = $req_data['is_promote'];
+        $is_new              = $req_data['is_new'];
+        $is_best             = $req_data['is_best'];
+        $is_on_sale          = $req_data['is_on_sale'];
+        $seo_keyword         = $req_data['seo_keyword'] ?? '';
+        $seo_description     = $req_data['seo_description'] ?? '';
+        $type_id             = $req_data['type_id'];
+        $goods_desc          = $req_data['goods_desc'] ?? '';
+
+        $goods = Goods::find($goods_id);
+
+        if (empty($goods)) {
             return res_fail('非法攻击');
         }
-        $brand->brand_name = $reqData['brand_name'];
-        $brand->site_url   = $reqData['site_url'];
-        $brand->save();
+        DB::beginTransaction();
+        try {
+
+            $update_arr = [
+                'goods_name'      => $goods_name,
+                'category_id'     => $category_id,
+                'brand_id'        => $brand_id,
+                'shop_price'      => $shop_price,
+                'jifen'           => $jifen,
+                'jyz'             => $jyz,
+                'jifen_price'     => $jifen_price,
+                'is_promote'      => $is_promote,
+                'is_hot'          => $is_hot,
+                'is_new'          => $is_new,
+                'is_best'         => $is_best,
+                'is_on_sale'      => $is_on_sale,
+                'seo_keyword'     => $seo_keyword,
+                'seo_description' => $seo_description,
+                'type_id'         => $type_id,
+                'goods_desc'      => $goods_desc,
+
+            ];
+
+            // 商品属性改变
+            if ($type_id != $goods->type_id) {
+                $b = 3;
+//                DB::table('goods_attr')->where('goods_id', $goods_id)->delete();
+            }
+
+            // 商品属性
+            $goods_attribute_arr = $request->input('goods_attribute_arr'); // 属性类型
+            $attribute_price_arr = $request->input('attribute_price_arr'); // 属性价格
+            if (!empty($goods_attribute_arr)) {
+                $goods_attr_insert_arr = [];
+                foreach ($goods_attribute_arr as $attr_id => $attr_value) {
+                    foreach ($attr_value as $k1 => $v1) {
+                        if (empty($v1)) {
+                            continue;
+                        }
+                        $price = isset($attribute_price_arr[$attr_id][$k1]) ? $attribute_price_arr[$attr_id][$k1] : 0;
+                        $temp = [
+                            'goods_id'   => $goods_id,
+                            'attr_id'    => $attr_id,
+                            'attr_value' => $v1,
+                            'attr_price' => $price,
+                        ];
+                        array_push($goods_attr_insert_arr,$temp);
+                    }
+                }
+//                DB::table('goods_attr')->insert($goods_attr_insert_arr);
+            }
+
+            $old_goods_attribute_arr = $request->input('old_goods_attribute_arr'); // 属性类型
+            $old_attribute_price_arr = $request->input('old_attribute_price_arr'); // 属性价格
+
+            foreach ($old_goods_attribute_arr as $attr_id => $attr_value) {
+                foreach ($attr_value as $k1 => $v1) {
+                    // 要修改的字段
+                    $old_field = ['attr_value' => $v1];
+                    if (isset($old_attribute_price_arr[$attr_id])) {
+                        $old_field['attr_price'] = $old_attribute_price_arr[$attr_id][$k1];
+                    }
+                    $c = $old_field;
+//                    DB::table('goods_attr')->where('id', $k1)->update($attr_value);
+                }
+            }
+
+
+            if ($is_promote == 1) {
+                $update_arr['promote_price']      = $req_data['promote_price'];
+                $update_arr['promote_start_time'] = strtotime($req_data['promote_start_time'] . ' 00:00:00');
+                $update_arr['promote_end_time']   = strtotime($req_data['promote_end_time'] . ' 23:59:59');
+            }
+
+            DB::table('goods')->where('id', $goods_id)->update($update_arr);
+
+            DB::table('goods_ext_category')->where('goods_id', $goods_id)->delete();
+            if (!empty($ext_cat_id)) {
+                $ecrData = [];
+                foreach (explode(',' ,$ext_cat_id) as $eci) {
+                    $ecrData[] = [
+                        'goods_id'    => $goods_id,
+                        'category_id' => $eci,
+                    ];
+                }
+                DB::table('goods_ext_category')->insert($ecrData);
+            }
+
+            //会员价
+            $member_price = $req_data['member_price'] ?? [];
+            DB::table('member_price')->where('goods_id', $goods_id)->delete();
+            if (!empty($market_price)) {
+                $mp_insert_arr = [];
+                foreach ($member_price as $k => $v) {
+                    $temp = [
+                        'goods_id' => $goods_id,
+                        'level_id' => $k,
+                        'price'    => $v,
+                    ];
+                    array_push($mp_insert_arr,$temp);
+                }
+                DB::table('member_price')->insert($mp_insert_arr);
+            }
+
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+        }
+
+
         return res_success([],'修改成功');
     }
 
@@ -535,4 +718,44 @@ class GoodsController extends BackendBaseController
         return res_success();
     }
 
+
+    /**
+     * 商品属性
+     * @param Request $request
+     * @return false|string
+     */
+    public function ajaxGetAttr(Request $request)
+    {
+        $typeId = $request->input('type_id');
+        /**
+         * 销售属性，与价格和搜索有关系
+         */
+       /*
+       $attrData = DB::table('attribute')
+            ->where('is_del','=',0)
+            ->where('attr_type','=',2)
+            ->where('type_id','=',$typeId)
+            ->orderBy('id')
+            ->get();
+       */
+
+        $attrData =  Attribute::where([
+            ['is_del', '=', 0],
+            ['attr_type', '=', 2],
+            ['type_id', '=', $typeId],
+        ])->with('attrSaleValue')->get()->toArray();
+        /**
+         * 商品规格
+         */
+        $attrDescData = DB::table('attribute')
+            ->where('attr_type','=',1)
+            ->where('type_id','=',$typeId)
+            ->orderBy('id')
+            ->get();
+        $ret = [
+            'attrData' => $attrData,
+            'attrDescData' => $attrDescData
+        ];
+        return res_success($ret);
+    }
 }

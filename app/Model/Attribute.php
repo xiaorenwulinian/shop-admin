@@ -13,9 +13,9 @@ class Attribute extends Model
         'attr_name','attr_type','attr_option_values','type_id','is_del'
     ];
 
-
-    public function setAttrOptionValuesAttribute($value)
+    public function attrSaleValue()
     {
-        $this->attributes['attr_option_values'] = str_replace('，',',',trim($value));
+       return $this->hasMany('App\Model\AttrSaleValue','attribute_id','id');
     }
+
 }

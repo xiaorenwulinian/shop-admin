@@ -126,23 +126,33 @@
                                         </div>
                                     </div>
                                     <div class="form-group">
-                                        <label for="shop_price" class="col-sm-2 control-label">商品价格(元)：</label>
+                                        <label for="market_price" class="col-sm-2 control-label">市场价(元)：</label>
+                                        <div class="col-sm-3">
+                                            <input type="text" class="form-control" name="market_price" id="market_price" value="{{$goodsData['market_price']}}">
+                                        </div>
+                                        <label for="shop_price" class="col-sm-2 control-label">本店价(元)：</label>
                                         <div class="col-sm-3">
                                             <input type="text" class="form-control" name="shop_price" id="shop_price" value="{{$goodsData['shop_price']}}">
                                         </div>
                                     </div>
 
                                     <div class="form-group">
-                                        <label for="jifen" class="col-sm-2 control-label">赠送积分:<br/>(不填和商品价格相同)：</label>
+                                        <label for="jifen" class="col-sm-2 control-label">赠送积分(不填和商品价格相同)：</label>
                                         <div class="col-sm-3">
                                             <input type="text" class="form-control" name="jifen" id="jifen" value="<?php echo $goodsData['jifen'] ?? 0;?>">
                                         </div>
-                                        <label for="jifen_price" class="col-sm-2 control-label">积分兑换，需要的积分数:<br/>（不填代表不能使用积分兑换）</label>
+
+                                        <label for="jyz" class="col-sm-2 control-label">赠送经验值：</label>
+                                        <div class="col-sm-3">
+                                            <input type="text" class="form-control" name="jyz" id="jyz" value="<?php echo $goodsData['jifen'] ?? 0;?>">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="jifen_price" class="col-sm-2 control-label">积分兑换，需要的积分数:（不填代表不能使用积分兑换）</label>
                                         <div class="col-sm-3">
                                             <input type="text" class="form-control" name="jifen_price" id="jifen_price" value="<?php echo $goodsData['jifen'] ?? 0;?>">
                                         </div>
                                     </div>
-
 
                                     <div class="form-group">
 
@@ -280,40 +290,62 @@
                                         </div>
                                     </div>
                                     <div id="attr_container">
-                                        <?php foreach ($selectSaleAttr as $attr_id => $ssa):?>
+                                        <?php
+                                            // 该商品已经存在的属性ID
+                                            $hasAttrId = [];
+
+                                        ?>
+                                        <?php foreach ($goodsAttrArr as $k => $v):?>
                                             <div class='form-group'>
-                                                <label class='col-sm-2 control-label'><?php echo $ssa[0]['attr_name'];?></label>
-                                                <?php foreach ($ssa as $k => $v):?>
+                                                <label class='col-sm-2 control-label'><?php echo $v['attr_name'];?></label>
                                                 <div class='col-sm-3'>
-                                                    <?php
-                                                        $operator = $k == 0 ? "[+]" : "[-]";
-                                                    ?>
-                                                    <a data-good-attr-id="{{$v['id']}}" data-attr-id="{{$v['attr_id']}}" onclick='addnew(this);' href='javascript:void(0);'>{{$operator}}</a>
-                                                    <select name="goods_sale_attr['{{$v['attr_id']}}']" class="form-control">
-                                                        <option value="">请选择</option>
-                                                        <?php foreach ($v['attr_sale_value'] as $attrId => $attrValue):?>
-                                                            <?php
-                                                                if (isset($v['attr_sale_id']) && $v['attr_sale_id'] == $attrId) {
-                                                                    $selected =  'selected="selected"';
-                                                                } else {
-                                                                    $selected = '';
-                                                                }
-                                                            ?>
-                                                            <option value="{{$attrId}}"  {{$selected}}>
-                                                                {{$attrValue}}
-                                                            </option>
-                                                        <?php endforeach;?>
-                                                    </select>
+                                                     <?php
+                                                        if ($v['attr_type'] == 1) :
+                                                            if (!in_array($v['attr_id'], $hasAttrId)) {
+                                                                $operator = "[+]";
+                                                                $hasAttrId[] = $v['attr_id'];
+                                                            } else {
+                                                                $operator = "[-]";
+                                                            }
+                                                     ?>
+                                                        <a data-good-attr-id="{{$v['id']}}" onclick='addnew(this);' href='javascript:void(0);'>{{$operator}}</a>
+                                                     <?php endif;?>
+
+                                                     <?php
+                                                         $old_ = isset($v['attr_value']) && !empty($v['attr_value']) ? 'old_' : '';  // 是否设置过这个属性，已经设置过，该属性前添加 old_ 进行区分
+                                                     ?>
+                                                     <?php
+                                                         // 判断有没有可选值，如果有就是下拉框，否则是文本框
+                                                         if (!$v['attr_option_values']) :?>
+                                                            <input type='text' class='form-control'  data-attr-type-value='0'  data-attr-id="<?php echo $v['attr_id']?>" 
+                                                                   name="{{$old_}}ga['{{$v['attr_id']}}']['{{$v['id']}}']" value="{{$v['attr_value']}}" />
+                                                     <?php
+                                                         else:
+                                                             $attr_option_values_arr = explode(',',$v['attr_option_values'])
+                                                      ?>
+                                                            <select name="{{$old_}}ga['{{$v['attr_id']}}']['<?php echo $v['id'] ?? '';?>']" class='form-control' data-attr-type-value='1' data-attr-id={{$v['attr_id']}} >
+                                                                <option value="">请选择</option>
+                                                                <?php foreach ($attr_option_values_arr as $attr_option_values_one):;?>
+                                                                    <?php
+                                                                        if (isset($v['attr_value']) && $v['attr_value'] == $attr_option_values_one) {
+                                                                            $selected =  'selected="selected"';
+                                                                        } else {
+                                                                            $selected = '';
+                                                                        }
+                                                                        ?>
+                                                                    <option value="{{$attr_option_values_one}}"  {{$selected}} >
+                                                                        {{$attr_option_values_one}}
+                                                                    </option>
+                                                                <?php endforeach;?>
+                                                            </select>
+                                                     <?php endif;?>
+                                                    <?php if($v['attr_type'] == 1):?>
+                                                         属性价格(元)：
+                                                         <input class='form-control' data-attr-id={{$v['attr_id']}}  name="old_attr_price['{{$v['attr_id']}}']['{{$v['id']}}']" type='text' value="{{$v['attr_price']}}" />
+                                                    <?php endif;?>
                                                 </div>
-                                                <?php endforeach;?>
                                             </div>
-
-                                        <?php endforeach; ?>
-
-
-                                    </div>
-                                    <div id="attr_desc_container">
-
+                                        <?php endforeach;?>
                                     </div>
                                 </div>
                                 <div role="tabpanel" class="tab-pane" id="nav_goods_img" style="padding-top: 20px;">
@@ -464,9 +496,14 @@
                 alert('请选择品牌');
                 return false;
             }
+            var market_price = $('#market_price').val();
+            if(market_price == '') {
+                alert('请输入商品市场价');
+                return false;
+            }
             var shop_price = $('#shop_price').val();
             if(shop_price == '') {
-                alert('请输入商品价格');
+                alert('请输入商品本店价');
                 return false;
             }
             var jifen = $('#jifen').val();
@@ -526,6 +563,19 @@
             });
             console.log('===goods_attribute===',goods_attribute_arr);
 
+            var attribute_price_arr = {};
+            $("input[name ^='attr_price']").each(function (index,el) {
+                var attr_id = $(this). attr('data-attr-id');
+                var cur_val = $(this).val();
+                console.log('===attr_id_value===',cur_val);
+                if (!attribute_price_arr.hasOwnProperty(attr_id)) {
+                    attribute_price_arr[attr_id] = [];
+                }
+                if (cur_val != '' && cur_val != null && cur_val) {
+                    attribute_price_arr[attr_id].push(cur_val);
+                }
+            });
+            console.log('===attribute_price_arr===',attribute_price_arr);
 
             var old_goods_attribute_arr = {};
             $("[name ^='old_ga']").each(function (index,el) {
@@ -548,6 +598,21 @@
             });
             console.log('===old_goods_attribute_arr===',old_goods_attribute_arr);
 
+            var old_attribute_price_arr = {};
+            $("input[name ^='old_attr_price']").each(function (index,el) {
+                var attr_id = $(this). attr('data-attr-id');
+                var cur_val = $(this).val();
+                console.log('===attr_id_value===',cur_val);
+                if (!old_attribute_price_arr.hasOwnProperty(attr_id)) {
+                    old_attribute_price_arr[attr_id] = [];
+                }
+                if (cur_val != '' && cur_val != null && cur_val) {
+                    old_attribute_price_arr[attr_id].push(cur_val);
+                }
+            });
+            console.log('===old_attribute_price_arr===',old_attribute_price_arr);
+
+
             var url = "<?php echo url('backend/goods/editStore');?>";
             $.ajax({
                 type: 'post',
@@ -559,9 +624,11 @@
                     brand_id            : brand_id,
                     category_id         : category_id,
                     ext_cat_id          : ext_cat_id,
+                    market_price        : market_price,
                     shop_price          : shop_price,
                     jifen               : jifen,
                     jifen_price         : jifen_price,
+                    jyz                 : jyz,
                     is_promote          : is_promote,
                     promote_price       : promote_price,
                     promote_start_time  : promote_start_time,
@@ -576,7 +643,9 @@
                     member_price        : member_price,
                     type_id             : type_id,
                     goods_attribute_arr      : goods_attribute_arr,
+                    attribute_price_arr      : attribute_price_arr,
                     old_goods_attribute_arr  : old_goods_attribute_arr,
+                    old_attribute_price_arr  : old_attribute_price_arr,
 
 
                     form_param: $('#formSubmit').serialize()
@@ -641,6 +710,9 @@
                                 }
                                 _html +=       "</select>";
                             }
+                            if (v.attr_type == 1){
+                                _html +=       "属性价格(元)： <input class='form-control' data-attr-id='"+v.id+"'  name='attr_price["+v.id+"][]' type='text' value='' />";
+                            }
                             _html +=     "</div>";
                             _html += "</div>";
                         });
@@ -659,7 +731,7 @@
         if(confirm('确定要删除吗?')) {
             $.ajax({
                 type: 'get',
-                url:  "<?php echo url('backend/goods/editDeleteImg');?>",
+                url:  "<?php echo url('backend/brand/editDeleteImg');?>",
                 dataType: 'json',
                 data: {id : brand_id},
                 success: function(ret){

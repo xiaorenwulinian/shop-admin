@@ -12,9 +12,18 @@ class TestController extends Controller
 {
     public function test(Request $request)
     {
-        $this->partitionKey();
+//        $this->partitionKey();
 //        $this->String();
 //        $this->excel();
+    }
+
+    public function fillData()
+    {
+        // 销售属性
+        $saleAttr = DB::table('attribute')->where('attr_type','=',1)->get();
+        foreach ($saleAttr as $v) {
+
+        }
     }
 
     public function arrayTools()

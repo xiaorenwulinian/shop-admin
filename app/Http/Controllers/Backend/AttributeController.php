@@ -77,13 +77,44 @@ class AttributeController extends BackendBaseController
             'attr_name.required'   => '分类必传',
             'attr_name.max'        => '标题应小于255个字！',
         ]);
-        $data = $request->input();
-        foreach ($data as $k=>$v) {
-            if (empty($v)) {
-                unset($data[$k]);
+        $reqParam = $request->input();
+        $attrType = $reqParam['attr_type'];
+        $attrName = $reqParam['attr_name'];
+        $typeId   = $reqParam['type_id'];
+        $data = [
+            'type_id'   => $typeId,
+            'attr_name' => $attrName,
+            'attr_type' => $attrType,
+        ];
+        $attrOptionValues =  str_replace('，',',',trim($reqParam['attr_option_values']));
+        $data['attr_option_values'] = $attrOptionValues;
+        DB::beginTransaction();
+        try {
+            $attr = Attribute::create($data);
+            $saleAttrInsert = [];
+            if ($attrType == 2) {
+                $attrOptionValuesArr = explode(',', $attrOptionValues);
+                $attrOptionValuesArr = array_unique($attrOptionValuesArr);
+                foreach ($attrOptionValuesArr as $v) {
+                    if (!empty($v)) {
+                        $temp = [
+                            'attr_name' => $attrName,
+                            'type_id' => $typeId,
+                            'attr_name_value' => $v,
+                            'attribute_id' => $attr->id,
+                        ];
+                        $saleAttrInsert[] = $temp;
+                    }
+                }
+                if (!empty($saleAttrInsert)) {
+                    DB::table('attr_sale_value')->insert($saleAttrInsert);
+                }
             }
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return res_fail($e->getMessage());
         }
-        Attribute::create($data);
         return res_success();
     }
 
@@ -132,17 +163,51 @@ class AttributeController extends BackendBaseController
         ]);
 
         $reqData = $request->input();
-        $attribute = Attribute::find($reqData['id']);
+        $attrId = $reqData['id'];
+        $attrType = $reqData['attr_type'];
+        $attrOptionValues =  str_replace('，',',',trim($reqData['attr_option_values']));
+
+        $attribute = Attribute::find($attrId);
         if (empty($attribute)) {
             return res_fail('非法攻击');
         }
-        $attribute->type_id = $reqData['type_id'];
+//        $attribute->type_id = $reqData['type_id'];
+//        $attribute->attr_type = $reqData['attr_type'];
         $attribute->attr_name = $reqData['attr_name'];
-        $attribute->attr_type = $reqData['attr_type'];
-        if (is_null($reqData['attr_option_values'])) {
-            $reqData['attr_option_values'] = '';
+        if ($attrType == 2) {
+            $saleAttr = DB::table('attr_sale_value')
+                ->where('attribute_id','=', $attrId)
+                ->pluck('attr_name_value','id')
+                ->toArray();
+            $saleAttrInsert = [];
+            $attrOptionValuesArr = explode(',', $attrOptionValues);
+            $attrOptionValuesArr = array_unique($attrOptionValuesArr);
+            foreach ($attrOptionValuesArr as $v) {
+                if (!in_array($v, $saleAttr)) {
+                    $temp = [
+                        'attr_name'       => $reqData['attr_name'],
+                        'type_id'         => $attribute->type_id,
+                        'attr_name_value' => $v,
+                        'attribute_id'    => $attrId,
+                    ];
+                    $saleAttrInsert[] = $temp;
+                }
+            }
+            if (!empty($saleAttrInsert)) {
+                DB::table('attr_sale_value')->insert($saleAttrInsert);
+            }
+            $saleAttrNew = DB::table('attr_sale_value')
+                ->where('attribute_id','=', $attrId)
+                ->pluck('attr_name_value','id')
+                ->toArray();
+            $attrOptionValues = implode(',', array_values($saleAttrNew));
+        } else {
+            if (empty($attrOptionValues)) {
+                $attrOptionValues = '';
+            }
         }
-        $attribute->attr_option_values = $reqData['attr_option_values'] ;
+
+        $attribute->attr_option_values = $attrOptionValues ;
         $attribute->save();
         return res_success([],'修改成功');
     }

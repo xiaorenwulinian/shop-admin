@@ -52,10 +52,10 @@
                             <label for="" class="col-sm-2 control-label">属性的类型：</label>
                             <div class="col-sm-8">
                                 <label class="radio-inline">
-                                    <input type="radio" name="attr_type" class="attr_type" value="0" checked="checked" />唯一
+                                    <input type="radio" name="attr_type" class="attr_type" value="1" checked="checked" />规格属性（如生产商）
                                 </label>
                                 <label class="radio-inline">
-                                    <input type="radio" name="attr_type" class="attr_type" value="1"  />可选
+                                    <input type="radio" name="attr_type" class="attr_type" value="2"  />销售属性（如手机颜色）
                                 </label>
                             </div>
                         </div>
@@ -87,18 +87,21 @@
 
             $('.curSubmit').on('click',function () {
                 var type_id = $('#type_id').val();
-                if (type_id == '' || type_id.length == 0) {
+                if (type_id == 0 || type_id.length == 0) {
                     layer.msg("请选择属性类型!", {icon: 5,time:2000});
                     return false;
                 }
-
                 var attr_name = $('#attr_name').val();
                 if (attr_name == '' || attr_name.length == 0) {
                     layer.msg("请输入属性名称!", {icon: 5,time:2000});
                     return false;
                 }
                 var attr_type = $("input[name='attr_type']:checked").val();
-                var attr_option_values = $('#attr_option_values').val();
+                var attr_option_values = $.trim($('#attr_option_values').val());
+                if (attr_option_values == ''  && attr_type == 2) {
+                    alert("销售属性必须有属性值");
+                    return false;
+                }
                 var url = "<?php echo url('backend/attribute/addStore');?>";
     //            var form_param = $('#formSubmit').serialize();
                 $.ajax({
@@ -106,7 +109,7 @@
                     url:  url,
                     dataType: 'json',
                     data: {
-                        id : type_id,
+                        type_id : type_id,
                         attr_name : attr_name,
                         attr_type : attr_type,
                         attr_option_values : attr_option_values,

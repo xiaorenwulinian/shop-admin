@@ -57,6 +57,7 @@
                             <th style="text-align: center"> <input type="checkbox" name="is_multi_select"  class="is_multi_select"> </th>
                             <th style="text-align: center">id</th>
                             <th style="text-align: center">商品名称</th>
+                            <th style="text-align: center">商品价格</th>
                             <th style="text-align: center">商品编号</th>
                             <th style="text-align: center">操作</th>
                         </tr>
@@ -67,6 +68,7 @@
                             <td><input type="checkbox" class="multi_select_input" name="multi_select[]" value="{{$v->id}}"/></td>
                             <td>{{$v->id}}</td>
                             <td>{{$v->goods_name}}</td>
+                            <td>{{$v->shop_price}}</td>
                             <td>{{$v->goods_number}}</td>
                             <td>
                                 <a href="<?php echo url("backend/goods/edit?id={$v->id}"); ?>" title="编辑">编辑</a> |

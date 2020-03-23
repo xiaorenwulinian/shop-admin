@@ -15,7 +15,6 @@ class IndexController extends BackendBaseController
 
     public function index()
     {
-
         /********** 取出当前管理员所拥有的前两级的权限 ************/
         // 取出当前管理员所有的权限
 //        $adminId = session('admin_user_id');

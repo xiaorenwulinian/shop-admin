@@ -78,7 +78,7 @@
                             <td>{{$v->id}}</td>
                             <td>{{$v->type_name}}</td>
                             <td>{{$v->attr_name}}</td>
-                            <td><?php echo $v->attr_type == 0 ? '唯一' : '可选';  ?></td>
+                            <td><?php echo $v->attr_type == 1 ? '规格属性' : '销售属性';  ?></td>
                             <td>{{$v->attr_option_values}}</td>
                             <td>
                                 <a href="<?php echo url("backend/attribute/edit?id={$v->id}"); ?>" title="编辑">编辑</a> |

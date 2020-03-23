@@ -109,6 +109,10 @@
                                     </div>
 
                                     <div class="form-group">
+                                        <label for="market_price" class="col-sm-2 control-label">市场价(元)：</label>
+                                        <div class="col-sm-3">
+                                            <input type="text" class="form-control" name="market_price" id="market_price" value="0.00">
+                                        </div>
                                         <label for="shop_price" class="col-sm-2 control-label">本店价(元)：</label>
                                         <div class="col-sm-3">
                                             <input type="text" class="form-control" name="shop_price" id="shop_price" value="0.00">
@@ -116,11 +120,18 @@
                                     </div>
 
                                     <div class="form-group">
-                                        <label for="jifen" class="col-sm-2 control-label">赠送积分:<br/>(不填和商品价格相同)：</label>
+                                        <label for="jifen" class="col-sm-2 control-label">赠送积分(不填和商品价格相同)：</label>
                                         <div class="col-sm-3">
                                             <input type="text" class="form-control" name="jifen" id="jifen" value="0">
                                         </div>
-                                        <label for="jifen_price" class="col-sm-2 control-label">积分兑换，需要的积分数:<br/>（不填代表不能积分兑换）</label>
+
+                                        <label for="jyz" class="col-sm-2 control-label">赠送经验值：</label>
+                                        <div class="col-sm-3">
+                                            <input type="text" class="form-control" name="jyz" id="jyz" value="0">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="jifen_price" class="col-sm-2 control-label">积分兑换，需要的积分数:（不填代表不能使用积分兑换）</label>
                                         <div class="col-sm-3">
                                             <input type="text" class="form-control" name="jifen_price" id="jifen_price" value="0">
                                         </div>
@@ -252,17 +263,7 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="form-group">
-                                        <label for="" class="col-sm-2 control-label">销售属性：</label>
-                                    </div>
                                     <div id="attr_container">
-
-                                    </div>
-
-                                    <div class="form-group">
-                                        <label for="" class="col-sm-2 control-label">商品规格：</label>
-                                    </div>
-                                    <div id="attr_desc_container">
 
                                     </div>
                                 </div>
@@ -418,50 +419,30 @@
                                 _html += "<div class='form-group'>";
                                 _html +=     "<label class='col-sm-2 control-label'>"+v.attr_name + " : </label>";
                                 _html +=     "<div class='col-sm-3'>";
-                                _html +=        " <a onclick='addnew(this);' href='javascript:void(0);'>[+]</a> ";
-                                // 先把可选值转化成数组
-                                var _attr = v.attr_sale_value;
-                                // var _attr = v.attr_option_values.split(",");
-                                _html +=         "<select name='goods_sale_attr[]' class='form-control'  data-attr-id='"+v.id+"' >";
-                                _html +=            "<option value=''>请选择</option>";
-                                // 循环每个可选值构造option
-                                for (var i=0; i<_attr.length; i++) {
-                                    _html +=        "<option value='"+_attr[i].id+"'>"+_attr[i].attr_name_value+"</option>";
+                                if (v.attr_type == 1) {
+                                    _html +=    " <a onclick='addnew(this);' href='javascript:void(0);'>[+]</a> ";
                                 }
-                                _html +=        "</select>";
-
+                                // 判断是否有可选值
+                                if (v.attr_option_values == "") {
+                                    _html +=     "<input type='text' class='form-control'  data-attr-type-value='0'  data-attr-id='"+v.id+"'    name='ga[" + v.id + "][]' />";
+                                } else {
+                                    // 先把可选值转化成数组
+                                    var _attr = v.attr_option_values.split(",");
+                                    _html +=      "<select name='ga["+v.id+"][]' class='form-control' data-attr-type-value='1' data-attr-id='"+v.id+"' >";
+                                    _html +=          "<option value=''>请选择</option>";
+                                    // 循环每个可选值构造option
+                                    for (var i=0; i<_attr.length; i++) {
+                                        _html +=       "<option value='"+_attr[i]+"'>"+_attr[i]+"</option>";
+                                    }
+                                    _html +=       "</select>";
+                                }
+                                if (v.attr_type == 1){
+                                    _html +=       "属性价格(元)： <input class='form-control' data-attr-id='"+v.id+"'  name='attr_price["+v.id+"][]' type='text' value='' />";
+                                }
                                 _html +=     "</div>";
                                 _html += "</div>";
                             });
                             $("#attr_container").html(_html);
-
-                            // 商品规格
-                            var attrDescData = ret.data.attrDescData;
-                            console.log(attrDescData);
-                            var desc_html = "";
-                            // 循环服务器返回的属性的JSON数据
-                            $(attrDescData).each(function(k,v) {
-                                desc_html += "<div class='form-group'>";
-                                desc_html +=     "<label class='col-sm-2 control-label'>"+v.attr_name + " : </label>";
-                                desc_html +=     "<div class='col-sm-3'>";
-                                // 判断是否有可选值
-                                if (v.attr_option_values == "") {
-                                    desc_html +=     "<input type='text' class='form-control'  data-attr-type-value='0'  data-attr-id='"+v.id+"'    name='goods_desc_attr[" + v.id + "]' />";
-                                } else {
-                                    // 先把可选值转化成数组
-                                    var _attr = v.attr_option_values.split(",");
-                                    desc_html +=      "<select name='goods_desc_attr["+v.id+"]' class='form-control' data-attr-type-value='1' data-attr-id='"+v.id+"' >";
-                                    desc_html +=          "<option value=''>请选择</option>";
-                                    // 循环每个可选值构造option
-                                    for (var i=0; i<_attr.length; i++) {
-                                        desc_html +=       "<option value='"+_attr[i]+"'>"+_attr[i]+"</option>";
-                                    }
-                                    desc_html +=       "</select>";
-                                }
-                                desc_html +=     "</div>";
-                                desc_html += "</div>";
-                            });
-                            $("#attr_desc_container").html(desc_html);
                         }
                     });
                 } else {
@@ -469,7 +450,6 @@
                 }
             });
             $('.curSubmit').on('click',function () {
-
                 var goods_name = $('#goods_name').val();
                 if(goods_name == '') {
                     alert('请输入商品名称');
@@ -494,12 +474,18 @@
                     alert('请选择品牌');
                     return false;
                 }
+                var market_price = $('#market_price').val();
+                if(market_price == '') {
+                    alert('请输入商品市场价');
+                    return false;
+                }
                 var shop_price = $('#shop_price').val();
                 if(shop_price == '') {
                     alert('请输入商品本店价');
                     return false;
                 }
                 var jifen = $('#jifen').val();
+                var jyz = $('#jyz').val();
                 var jifen_price = $('#jifen_price').val(); //积分兑换价
                 var is_promote = $('.is_promote:checked').val();
                 var promote_price = '';
@@ -541,31 +527,40 @@
                 });
                 var ext_cat_id = ext_cat_id_arr.length >0 ? ext_cat_id_arr.join(',') : '';
 
-                var goods_sale_attr_arr = [];
-                $("[name ^='goods_sale_attr']").each(function (index,el) {
-                    var cur_val = $(this).find('option:selected').val();
-                    if (cur_val != '' && cur_val != null && cur_val && $.inArray(cur_val, goods_sale_attr_arr) == -1) {
-                        goods_sale_attr_arr.push(cur_val);
-                    }
-                });
-                var goods_sale_attr_arr = goods_sale_attr_arr.length >0 ? goods_sale_attr_arr.join(',') : '';
-
-                console.log('=== goods_sale_attr_arr ===',goods_sale_attr_arr);
-                var goods_desc_attr_arr = {};
-                $("[name ^='goods_desc_attr']").each(function (index,el) {
+                var goods_attribute_arr = {};
+                $("[name ^='ga']").each(function (index,el) {
                     var attr_id = $(this). attr('data-attr-id');
-                    var attr_type_value = $(this).attr('data-attr-type-value');
+                    var attr_type_value = $(this). attr('data-attr-type-value');
                     if (attr_type_value == 0 )  {
-                        var cur_val = $(this).val();  // 输入框
+                        // 输入框
+                        var cur_val = $(this).val();
                     } else {
-                        var cur_val = $(this).find('option:selected').val(); // 下拉框
+                        // 下拉框
+                        var cur_val = $(this).find('option:selected').val();
                     }
-                    cur_val = $.trim(cur_val);
+                    console.log('===attr_id_value===',cur_val);
+                    if (!goods_attribute_arr.hasOwnProperty(attr_id)) {
+                        goods_attribute_arr[attr_id] = [];
+                    }
                     if (cur_val != '' && cur_val != null && cur_val) {
-                        goods_desc_attr_arr[attr_id] = cur_val;
+                        goods_attribute_arr[attr_id].push(cur_val);
                     }
                 });
-                goods_desc_attr_arr  = JSON.stringify(goods_desc_attr_arr);
+                console.log('===goods_attribute===',goods_attribute_arr);
+
+                var attribute_price_arr = {};
+                $("input[name ^='attr_price']").each(function (index,el) {
+                    var attr_id = $(this). attr('data-attr-id');
+                    var cur_val = $(this).val();
+                    console.log('===attr_id_value===',cur_val);
+                    if (!attribute_price_arr.hasOwnProperty(attr_id)) {
+                        attribute_price_arr[attr_id] = [];
+                    }
+                    if (cur_val != '' && cur_val != null && cur_val) {
+                        attribute_price_arr[attr_id].push(cur_val);
+                    }
+                });
+                console.log('===attribute_price_arr===',attribute_price_arr);
 
                 /*
                  //商品相册,原图和缩略图
@@ -591,9 +586,11 @@
                         ext_cat_id          : ext_cat_id,
                         goods_img           : logo_path,
                         goods_thumb_img     : logo_thumb_path,
+                        market_price        : market_price,
                         shop_price          : shop_price,
                         jifen               : jifen,
                         jifen_price         : jifen_price,
+                        jyz                 : jyz,
                         is_promote          : is_promote,
                         promote_price       : promote_price,
                         promote_start_time  : promote_start_time,
@@ -610,8 +607,8 @@
                         album_path          : JSON.stringify(photo_multi_path), // 相册原图
                         album_thumb_path    : JSON.stringify(photo_multi_thumb_path), // 相册缩略图
                         form_param          : form_param,
-                        goods_sale_attr_arr : goods_sale_attr_arr,
-                        goods_desc_attr     : goods_desc_attr_arr,
+                        goods_attribute_arr : goods_attribute_arr,
+                        attribute_price_arr : attribute_price_arr,
                     },
                     headers:{
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
