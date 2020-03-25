@@ -17,8 +17,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::group([],function ($route) {
     // 127.0.0.1:80/miniProgram/test
-    $route->get('test',function () {
-        return 'mini test';
+    $route->get('test1',function () {
+        return 'mini test1';
     });
     $route->group(['prefix'=>'user'],function ($route) {
         $route->get('index',function () {

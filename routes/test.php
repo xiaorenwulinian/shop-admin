@@ -17,16 +17,15 @@ use Illuminate\Support\Facades\Route;
 
 Route::group(['prefix'=>'test','namespace'=>'Test'],function ($route) {
     // 127.0.0.1:80/miniProgram/test
-    $route->get('/',function () {
+    $route->get('/test',function () {
         return 'test test';
     });
+
+    $route->get('/','TestController@index');
+
     $route->group(['prefix'=>'user'],function ($route) {
         $route->get('index',function () {
             return 'mini user index';
         });
     });
-});
-
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
 });
