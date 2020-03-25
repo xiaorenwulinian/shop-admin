@@ -45,6 +45,8 @@ class RouteServiceProvider extends ServiceProvider
 
         $this->mapLclapiRoutes();
 
+        $this->mapTestRoutes();
+
     }
 
     /**
@@ -107,5 +109,16 @@ class RouteServiceProvider extends ServiceProvider
             ->namespace($this->namespace)
             ->group(base_path('routes/lclapi.php'));
     }
-    
+
+    /**
+     * 测试API
+     */
+    protected function mapTestRoutes()
+    {
+        Route::middleware('test')
+            ->namespace($this->namespace)
+            ->group(base_path('routes/test.php'));
+    }
+
+
 }
