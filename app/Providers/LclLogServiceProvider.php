@@ -15,7 +15,6 @@ class LclLogServiceProvider extends ServiceProvider
     {
         //
     }
-
     /**
      * Bootstrap services.
      *
@@ -23,6 +22,9 @@ class LclLogServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
+        // 自定义门面别名和具体的实现类进行绑定
+        $this->app->bind('LclLog', function () {
+            return new \App\Common\FacadeConcrete\LclLog();
+        });
     }
 }

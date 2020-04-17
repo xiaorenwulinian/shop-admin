@@ -176,6 +176,11 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
 
+        /*
+         * 自定义服务提供者
+         */
+        App\Providers\LclLogServiceProvider::class,
+
     ],
 
     /*

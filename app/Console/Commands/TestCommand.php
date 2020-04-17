@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Jobs\TestJob;
 use Illuminate\Console\Command;
 
 class TestCommand extends Command
@@ -37,8 +38,17 @@ class TestCommand extends Command
      */
     public function handle()
     {
-        $ret = $this->test03();
+        $ret = $this->test04();
         dd($ret);
+    }
+
+    public function test04()
+    {
+        for ($i = 0; $i < 10; $i++) {
+            $num = 'lcljob_'. ($i + 10);
+            TestJob::dispatch($num)->onQueue('testjob')->delay(300);
+        }
+        return 'ok';
     }
 
     public function test01()

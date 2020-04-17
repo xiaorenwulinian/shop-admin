@@ -2,13 +2,15 @@
 
 namespace App\Http\Controllers\Test;
 
-use Illuminate\Http\Request;
+use App\Common\LclFacades\LclLogFacades;
 use App\Http\Controllers\Controller;
 
 class TestController extends Controller
 {
     public function index()
     {
-        return 3;
+
+        $ret = LclLogFacades::info();
+        return $ret;
     }
 }
