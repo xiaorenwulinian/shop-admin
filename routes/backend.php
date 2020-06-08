@@ -156,6 +156,6 @@ Route::group(['prefix'=>'backend','namespace'=>'Backend'],function ($route) {
     });
 
     // 生成二维码
-    Route::post('getQrCode', 'PublicController@getQrCode');
+    Route::get('getQrCode', 'PublicController@getQrCode');
 
 });

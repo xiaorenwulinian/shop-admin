@@ -10,4 +10,9 @@ class Admin extends Model
     protected $fillable = ['username', 'password'];
     public $timestamps = false;
 
+    public function role()
+    {
+        return $this->belongsToMany(Role::class, 'admin_role');
+    }
+
 }

@@ -31,5 +31,9 @@ class PublicController extends Controller
             mkdir(public_path( '/qrcode'));
         }
         $qrCode->writeFile(public_path( '/qrcode/qrcode.png'));
+        header('Content-Type: '.$qrCode->getContentType());
+
+        $dataUri = $qrCode->writeDataUri();
+        echo "<img src='{$dataUri}'>";
     }
 }
